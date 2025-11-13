@@ -53,4 +53,6 @@ class MainWin(QMainWindow):
         self.message_changed.emit(message) #Shows the message to other windows
     
     def open_login_windows(self):
-        #WINDOW SPAWNING LET"S GOOOOO. 
+        #WINDOW SPAWNING LET"S GOOOOO
+        self.bsky_window = BrowserWindow("Bsky", "https://bsky.app/login", self.message_changed)
+        self.
