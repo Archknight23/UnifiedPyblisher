@@ -55,4 +55,20 @@ class MainWin(QMainWindow):
     def open_login_windows(self):
         #WINDOW SPAWNING LET"S GOOOOO
         self.bsky_window = BrowserWindow("Bsky", "https://bsky.app/login", self.message_changed)
-        self.
+        self.bsky_window.show()
+        self.x_window = BrowserWindow("X","https://x.com/login", self.message_changed)
+        self.x_window.show()
+        self.xhs_window = BrowserWindow("XHS", "https://www.xiaohongshu.com/login", self.message_changed)
+        self.xhs_window.show()
+
+    def post_all(self):
+       message = self.text_edit.toPlainText()
+        # Post events via JS in each browser window
+       if self.bsky_window:
+           self.bsky_window.web_view.page().runJavaScript('document.querySelector("button[data-testid-primarybutton]").click();')
+       if self.x_window:
+               self.x_window.web_view.page().runJavaScript('document.querySelector("[data-testid-tweetButtonInline]").click();')
+       if self.xhs_window:
+           self.xhs_window.web_view.page().runJavaScript('document.querySelecctor(".publish-btn").click();')
+class BrowserWindow(QMainWindow):
+    def __init__(self, title, url, message_signal): 
