@@ -23,6 +23,34 @@ class MainWin(QMainWindow):
         self.text_edit = QTextEdit() # Textbox
         self.text_edit.textChanged.connect(self.on_text_changed)
         layout.addWidget(self.text_edit)
-
+        #Character Limit Logic
         self.char_label = QLabel("Characters: 0 || Limits: X: 250 (included with bluescheck) || Bsky: 150, XHS: 1000 Mandarin Characters")
-        layout.addWidget(self)
+        layout.addWidget(self.char_label)
+
+    #Login Button 
+        login_button = QPushButton("Access Platform")
+        login_button.clicked.connect(self.open_login_windows)
+        layout.addWidget(login_button)
+
+    #Post Button
+        post_button = QPushButton("Post to selected Platforms")
+        post_button.clicked.connect(self.post_all)
+        layout.addWidget(post_button)
+
+    #Hyprland
+        self.bsky_windows = None
+        self.x_windows = None
+        self.xhs_windows = None
+    
+    def on_text_changed(self):
+        message = self.text_edit.toPlainText()
+        count = len(message)
+        self.char_label.setText(f"Characters: {count} / || limits: X: 250, Bsky: 300, XHS: 1000")
+        if count > 280:
+            self.char_label.setStyleSheet("color: red;")
+        else:
+            self.char_label.setStyleSheet("")
+        self.message_changed.emit(message) #Shows the message to other windows
+    
+    def open_login_windows(self):
+        #WINDOW SPAWNING LET"S GOOOOO. 
