@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chaos Foundry Central Publishing Service</title>
+        <!--QWebChannel: Connects Head to Ass -->
+        <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+        <!-- Tailwind CSS for making it look pretty -->
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <!-- Font Awesome for Icons and gubbins --->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+    </head>
+    <body
+        class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen"
+    >
+        <!-- Header with logo and title -->
+        <header
+            class="bg-black/30 backdrop-blur-md border-b border-white/10 sticky top-0 z-50"
+        >
+            <div class="max-w-6xl mx-auto px-4 py-4">
+                <div class="flex items-center justify-between gap-3">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center"
+                    >
+                        <i class="fas fa-share-alt text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-white">
+                            Chaos Foundry Unified Publishing Service
+                        </h1>
+                        <p class="text-xs text-gray-400">
+                            Chaos Foundry Tech Division Research Project
+                        </p>
+                    </div>
+                </div>
+                <!-- Connecting Services  -->
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span class="text-gray-400" id="status">Ready</span>
+                </div>
+            </div>
+        </header>
+        <!-- Main content -->
+        <main class="max-w-4xl mx-auto px-4 py-8">
+            <!--Platform Selection -->
+            <div
+                class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10 mb-6"
+            >
+                <h2 class="text-white font-semibold mb-4">Pick your Poison</h2>
+                <div class="grid grid-cols-3 gap-4">
+                    <!-- X/Twitter -->
+                    <label
+                        class="cursor-pointer bg-gray-800/50 rounded-xl p-4 border border-white/5 hover:border-blue-500/50"
+                    >
+                        <input
+                            type="checkbox"
+                            id="platform-x"
+                            class="hidden"
+                            checked
+                        />
+                        <div class="flex items-center gap-3">
+                            <i class="fab fa-x-twitter text-white text-xl"></i>
+                            <span class="text-white">Twitter/X</span>
+                        </div>
+                    </label>
+                    <!--Bsky-->
+                    <label
+                        class="cursor-pointer bg-gray-800/50 rounded-xl p-4 border border-white/5 hover:border-blue-400/50"
+                    >
+                        <input
+                            type="checkbox"
+                            id="platform-bluesky"
+                            class="hidden"
+                            checked
+                        />
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-cloud text-blue-400 text-xl"></i>
+                            <span class="text-white">Bsky</span>
+                        </div>
+                    </label>
+                    <!--YouTube-->
+                    <label
+                        class="cursor-pointer bg-gray-800/50 rounded-xl p-4 border border-white/5 hover:border-red-500/50"
+                    >
+                        <input
+                            type="checkbox"
+                            id="platform-youtube"
+                            class="hidden"
+                        />
+                        <div class="flex items-center gap-3">
+                            <i class="fab fa-youtube text-red-500 text-xl"></i>
+                            <span class="text-white">YouTube</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <!--Post editor-->
+            <div
+                class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10"
+            >
+                <h2 class="text-white font-semibold mb-4">
+                    Compose your message
+                </h2>
+                <!--Textarea-->
+                <textarea
+                    id="postContent"
+                    rows="6"
+                    class="w-full bg-gray-900/50 border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 resize-none"
+                    placeholder="What's Happening?"
+                ></textarea>
+                <!--Character Counts-->
+                <div class="flex gap-4 mt-3 text-sm text-gray-400">
+                    <span id="charX">X: 0/280</span>
+                    <span id="charBsky">Bluesky: 0/300</span>
+                    <span id="charYT">YouTube: 0/2200</span>
+                </div>
+                <!-- Publish Button -->
+                <button
+                    id="publishBtn"
+                    class="mt-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-xl"
+                >
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Publish Transmission
+                </button>
+            </div>
+        </main>
+        <script>
+            //Find the bridge
+            let pyBridge = null;
+            //init QWeb to Py
+            new QWebChannel(qt.webChannelTransport, function (channel) {
+                //Get PyBridge Obj
+                pyBridge = channel.objects.pyBridge;
+
+                console.log("QWebChannel connected, let's gooooooo!");
+                //Test It
+                const response = pyBridge.testConnection(
+                    "What's good JS?",
+                    "Frontend",
+                );
+                console.log("Python says:", response);
+                //Listening for results
+                pyBridge.operationFinished.connect(
+                    function (platform, success, message) {
+                        console.log(
+                            `${platform}: ${success ? "✅" : "❌"} ${message}`,
+                        );
+                        document.getElementById("status").textContent =
+                            `${platform}: ${message}`;
+                    },
+                );
+            });
+
+            // Character counter
+            document
+                .getElementById("postContent")
+                .addEventListener("input", function (e) {
+                    const len = e.target.value.length;
+                    document.getElementById("charX").textContent =
+                        `X: ${len}/280`;
+                    document.getElementById("charBsky").textContent =
+                        `Bluesky: ${len}/300`;
+                    document.getElementById("charYT").textContent =
+                        `YouTube: ${len}/2200`;
+                });
+
+            // Publish button
+            document
+                .getElementById("publishBtn")
+                .addEventListener("click", function () {
+                    const content = document
+                        .getElementById("postContent")
+                        .value.trim();
+
+                    if (!content) {
+                        alert("Please write something first!");
+                        return;
+                    }
+
+                    // Gather selected platforms
+                    const platforms = [];
+                    if (document.getElementById("platform-x").checked)
+                        platforms.push("x");
+                    if (document.getElementById("platform-bluesky").checked)
+                        platforms.push("bluesky");
+                    if (document.getElementById("platform-youtube").checked)
+                        platforms.push("youtube");
+
+                    if (platforms.length === 0) {
+                        alert("Please select at least one platform!");
+                        return;
+                    }
+
+                    // Send to Python
+                    const data = {
+                        content: content,
+                        platforms: platforms,
+                        image: null,
+                        credentials: {}, // Will add real creds later
+                    };
+
+                    console.log("📤 Sending to Python:", data);
+                    pyBridge.handlePublishRequest(JSON.stringify(data));
+                });
+        </script>
+    </body>
+</html>
