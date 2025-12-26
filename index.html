@@ -1,211 +1,1108 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Chaos Foundry Central Publishing Service</title>
-        <!--QWebChannel: Connects Head to Ass -->
-        <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
-        <!-- Tailwind CSS for making it look pretty -->
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-        <!-- Font Awesome for Icons and gubbins --->
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        />
-    </head>
-    <body
-        class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen"
-    >
-        <!-- Header with logo and title -->
-        <header
-            class="bg-black/30 backdrop-blur-md border-b border-white/10 sticky top-0 z-50"
-        >
-            <div class="max-w-6xl mx-auto px-4 py-4">
-                <div class="flex items-center justify-between gap-3">
-                    <div
-                        class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center"
-                    >
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Publisher - Multi-Platform Social Media Post</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval' qrc:;">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .platform-card {
+            transition: all 0.3s ease;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .platform-card.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .char-count {
+            transition: color 0.2s ease;
+        }
+
+        .char-count.warning {
+            color: #f59e0b;
+        }
+
+        .char-count.danger {
+            color: #ef4444;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .tab-active {
+            border-bottom: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
+
+        .status-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .toast {
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .history-item {
+            transition: background-color 0.2s ease;
+        }
+
+        .history-item:hover {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
+    <!-- Header -->
+    <header class="bg-black/30 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-share-alt text-white"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-white">
-                            Chaos Foundry Unified Publishing Service
-                        </h1>
+                        <h1 class="text-xl font-bold text-white">Chaos Foundry Unified Publishing Service</h1>
+                        <p class="text-xs text-gray-400">Chaos Foundry Tech Division Research Project</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="openSettings()" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-cog text-xl"></i>
+                    </button>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span id="connectionStatus" class="status-dot w-2 h-2 bg-green-500 rounded-full"></span>
+                        <span class="text-gray-400" id="status">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Left Column - Post Editor -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Platform Selection -->
+                <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                    <h2 class="text-white font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-globe text-blue-400"></i>
+                        Pick your Poison
+                    </h2>
+                    <div class="grid grid-cols-3 gap-4">
+                        <!-- X/Twitter -->
+                        <label class="platform-card cursor-pointer bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl p-4 border border-white/5 hover:border-blue-500/50">
+                            <input type="checkbox" id="platform-x" class="hidden platform-toggle" checked onchange="updateCharCounts()">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center">
+                                    <i class="fab fa-x-twitter text-white text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-white font-medium">X / Twitter</div>
+                                    <div class="text-xs text-gray-400">280 chars</div>
+                                </div>
+                                <div class="check-indicator w-6 h-6 rounded-full border-2 border-gray-600 flex items-center justify-center">
+                                    <i class="fas fa-check text-white text-xs hidden"></i>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Bluesky -->
+                        <label class="platform-card cursor-pointer bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl p-4 border border-white/5 hover:border-blue-400/50">
+                            <input type="checkbox" id="platform-bluesky" class="hidden platform-toggle" checked onchange="updateCharCounts()">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-cloud text-white text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-white font-medium">Bluesky</div>
+                                    <div class="text-xs text-gray-400">300 chars</div>
+                                </div>
+                                <div class="check-indicator w-6 h-6 rounded-full border-2 border-gray-600 flex items-center justify-center">
+                                    <i class="fas fa-check text-white text-xs hidden"></i>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- YouTube Community -->
+                        <label class="platform-card cursor-pointer bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl p-4 border border-white/5 hover:border-red-500/50">
+                            <input type="checkbox" id="platform-youtube" class="hidden platform-toggle" onchange="updateCharCounts()">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center">
+                                    <i class="fab fa-youtube text-white text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-white font-medium">YouTube</div>
+                                    <div class="text-xs text-gray-400">Community</div>
+                                </div>
+                                <div class="check-indicator w-6 h-6 rounded-full border-2 border-gray-600 flex items-center justify-center">
+                                    <i class="fas fa-check text-white text-xs hidden"></i>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Post Editor -->
+                <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-white font-semibold flex items-center gap-2">
+                            <i class="fas fa-pen text-green-400"></i>
+                            Compose your message
+                        </h2>
+                        <div class="flex items-center gap-2 text-sm">
+                            <button onclick="insertTag('bold')" class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition" title="Bold">
+                                <i class="fas fa-bold"></i>
+                            </button>
+                            <button onclick="insertTag('italic')" class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition" title="Italic">
+                                <i class="fas fa-italic"></i>
+                            </button>
+                            <button onclick="insertTag('link')" class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition" title="Link">
+                                <i class="fas fa-link"></i>
+                            </button>
+                            <span class="h-6 w-px bg-gray-700 mx-1"></span>
+                            <button onclick="document.getElementById('imageInput').click()" class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition" title="Add Image">
+                                <i class="fas fa-image"></i>
+                            </button>
+                            <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <textarea
+                            id="postContent"
+                            rows="6"
+                            class="w-full bg-gray-900/50 border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition resize-none"
+                            placeholder="What's Happening?"
+                            oninput="updateCharCounts()"
+                        ></textarea>
+
+                        <!-- Image Preview -->
+                        <div id="imagePreview" class="hidden mt-3">
+                            <div class="relative inline-block">
+                                <img id="previewImg" src="" alt="Preview" class="max-h-32 rounded-lg">
+                                <button onclick="removeImage()" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Character Counts -->
+                    <div class="flex flex-wrap gap-4 mt-4">
+                        <div id="charCountX" class="char-count text-sm text-gray-400">
+                            <i class="fab fa-x-twitter mr-1"></i>X: <span>0</span>/280
+                        </div>
+                        <div id="charCountBluesky" class="char-count text-sm text-gray-400">
+                            <i class="fas fa-cloud mr-1"></i>Bluesky: <span>0</span>/300
+                        </div>
+                        <div id="charCountYoutube" class="char-count text-sm text-gray-400">
+                            <i class="fab fa-youtube mr-1"></i>YouTube: <span>0</span>/2200
+                        </div>
+                    </div>
+
+                    <!-- Post Button -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 mt-6 pt-4 border-t border-white/10">
+                        <div class="flex items-center gap-3 text-sm text-gray-400">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <span id="selectedCount">2 platforms selected</span>
+                            <button
+                                onclick="copyPostContent()"
+                                class="px-3 py-1 rounded-lg border border-white/10 text-gray-300 hover:text-white hover:border-white/20 transition"
+                                title="Copy the post text"
+                            >
+                                <i class="fas fa-copy mr-1"></i>Copy Content
+                            </button>
+                        </div>
+                        <button
+                            onclick="publishPost()"
+                            id="publishBtn"
+                            class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-xl flex items-center gap-2 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Publish Transmission</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preview Section -->
+                <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                    <h2 class="text-white font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-eye text-yellow-400"></i>
+                        Live Preview
+                    </h2>
+                    <div id="previewContainer" class="space-y-4">
+                        <!-- X Preview -->
+                        <div id="previewX" class="bg-black rounded-xl p-4 border border-gray-700">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 bg-gray-700 rounded-full flex-shrink-0"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span id="previewXName" class="font-bold text-white">Your Name</span>
+                                        <span id="previewXHandle" class="text-gray-500">@handle</span>
+                                        <span class="text-gray-600">·</span>
+                                        <span class="text-gray-500 text-sm">now</span>
+                                    </div>
+                                    <p id="previewXText" class="text-white mt-1 whitespace-pre-wrap"></p>
+                                    <div id="previewXImage" class="hidden mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bluesky Preview -->
+                        <div id="previewBluesky" class="bg-gradient-to-br from-blue-900/50 to-blue-800/30 rounded-xl p-4 border border-blue-700/50" style="display:none;">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 bg-blue-500 rounded-full flex-shrink-0"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span id="previewBlueskyName" class="font-bold text-white">Your Name</span>
+                                        <span id="previewBlueskyHandle" class="text-blue-300">@handle.bsky.social</span>
+                                    </div>
+                                    <p id="previewBlueskyText" class="text-white mt-1 whitespace-pre-wrap"></p>
+                                    <div id="previewBlueskyImage" class="hidden mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- YouTube Preview -->
+                        <div id="previewYoutube" class="bg-gradient-to-br from-red-900/50 to-red-800/30 rounded-xl p-4 border border-red-700/50 hidden">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 bg-red-600 rounded-full flex-shrink-0"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span id="previewYoutubeName" class="font-bold text-white">Your Channel</span>
+                                        <span id="previewYoutubeHandle" class="text-red-300">YouTube</span>
+                                    </div>
+                                    <p id="previewYoutubeText" class="text-white mt-1 whitespace-pre-wrap"></p>
+                                    <div id="previewYoutubeImage" class="hidden mt-3"></div>
+                                    <div class="flex items-center gap-4 mt-3 text-gray-400 text-sm">
+                                        <span><i class="far fa-thumbs-up mr-1"></i>0</span>
+                                        <span><i class="far fa-comment mr-1"></i>0</span>
+                                        <span><i class="fas fa-share mr-1"></i>Share</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - History & Stats -->
+            <div class="space-y-6">
+                <!-- Quick Actions -->
+                <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                    <h2 class="text-white font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-bolt text-blue-400"></i>
+                        Quick Actions
+                    </h2>
+                    <div class="space-y-3 text-sm">
+                        <button onclick="openComposer('x')" class="w-full bg-gray-800/50 hover:bg-gray-800 text-white py-2 rounded-lg transition flex items-center justify-between">
+                            <span><i class="fab fa-x-twitter mr-2 text-gray-300"></i>Open X Composer</span>
+                            <i class="fas fa-arrow-up-right-from-square text-xs text-gray-400"></i>
+                        </button>
+                        <button onclick="openComposer('youtube')" class="w-full bg-gray-800/50 hover:bg-gray-800 text-white py-2 rounded-lg transition flex items-center justify-between">
+                            <span><i class="fab fa-youtube mr-2 text-red-500"></i>Open YouTube Studio</span>
+                            <i class="fas fa-arrow-up-right-from-square text-xs text-gray-400"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">
+                        Use Copy Content, then paste into the composer.
+                    </p>
+                </div>
+                <!-- Quick Stats -->
+                <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                    <h2 class="text-white font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-bar text-purple-400"></i>
+                        Today's Stats
+                    </h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-800/50 rounded-xl p-4 text-center">
+                            <div id="postsToday" class="text-2xl font-bold text-white">0</div>
+                            <div class="text-xs text-gray-400">Posts</div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-xl p-4 text-center">
+                            <div id="reactionsToday" class="text-2xl font-bold text-white">0</div>
+                            <div class="text-xs text-gray-400">Reactions</div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-xl p-4 text-center">
+                            <div id="platformsReached" class="text-2xl font-bold text-white">2</div>
+                            <div class="text-xs text-gray-400">Platforms</div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-xl p-4 text-center">
+                            <div id="timeSaved" class="text-2xl font-bold text-white">~5m</div>
+                            <div class="text-xs text-gray-400">Time Saved</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post History -->
+                <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-white font-semibold flex items-center gap-2">
+                            <i class="fas fa-history text-orange-400"></i>
+                            Recent Posts
+                        </h2>
+                        <button onclick="clearHistory()" class="text-xs text-gray-400 hover:text-white transition">Clear</button>
+                    </div>
+                    <div id="historyContainer" class="space-y-3 max-h-96 overflow-y-auto">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-inbox text-4xl mb-3 opacity-50"></i>
+                            <p class="text-sm">No posts yet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Documentation -->
+                <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                    <h2 class="text-white font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-book text-green-400"></i>
+                        API Setup
+                    </h2>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-center gap-2 text-gray-300">
+                            <i class="fab fa-x-twitter text-gray-500 w-5"></i>
+                            <span>X: <a href="https://developer.twitter.com" target="_blank" class="text-blue-400 hover:underline">Twitter Dev</a></span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-300">
+                            <i class="fas fa-cloud text-blue-400 w-5"></i>
+                            <span>Bluesky: <a href="https://docs.bsky.app" target="_blank" class="text-blue-400 hover:underline">AT Protocol</a></span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-300">
+                            <i class="fab fa-youtube text-red-500 w-5"></i>
+                            <span>YouTube: <a href="https://developers.google.com/youtube" target="_blank" class="text-blue-400 hover:underline">Google API</a></span>
+                        </div>
+                    </div>
+                    <button onclick="openApiKeys()" class="w-full mt-4 bg-gray-700/50 hover:bg-gray-700 text-white py-2 rounded-lg transition text-sm">
+                        <i class="fas fa-sliders mr-2"></i>Configure Posting
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 rounded-2xl w-full max-w-lg border border-white/10 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-white">Posting Configuration</h3>
+                <button onclick="closeSettings()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <!-- Posting Methods -->
+                <div class="bg-gradient-to-r from-gray-800/50 to-gray-900/50 rounded-xl p-4 border border-gray-700">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                            <i class="fas fa-route text-white text-sm"></i>
+                        </div>
+                        <span class="font-medium text-white">Posting Methods</span>
+                    </div>
+                    <div class="space-y-2 text-sm text-gray-300">
+                        <div class="flex items-center justify-between">
+                            <span><i class="fab fa-x-twitter text-gray-400 mr-2"></i>X / Twitter</span>
+                            <span class="text-xs bg-gray-700/60 px-2 py-1 rounded-full">Intent Link</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span><i class="fab fa-youtube text-red-500 mr-2"></i>YouTube</span>
+                            <span class="text-xs bg-gray-700/60 px-2 py-1 rounded-full">Studio Paste</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span><i class="fas fa-cloud text-blue-400 mr-2"></i>Bluesky</span>
+                            <span class="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded-full">API (FOSS)</span>
+                        </div>
+                    </div>
+                    <label class="mt-4 flex items-center gap-2 text-xs text-gray-300">
+                        <input type="checkbox" id="openComposersInternal" class="rounded border-gray-600 bg-gray-800">
+                        Open X/YouTube composers inside the app
+                    </label>
+                </div>
+
+                <div class="bg-gradient-to-r from-gray-800/40 to-gray-900/40 rounded-xl p-4 border border-gray-700">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+                            <i class="fas fa-right-to-bracket text-white text-sm"></i>
+                        </div>
+                        <span class="font-medium text-white">Logins</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="openLogin('x')" class="w-full bg-gray-800/70 hover:bg-gray-800 text-white py-2 rounded-lg transition text-sm">
+                            <i class="fab fa-x-twitter mr-2 text-gray-300"></i>Open X Login
+                        </button>
+                        <button onclick="openLogin('youtube')" class="w-full bg-gray-800/70 hover:bg-gray-800 text-white py-2 rounded-lg transition text-sm">
+                            <i class="fab fa-youtube mr-2 text-red-500"></i>Open YouTube Login
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3">
+                        Log in once; sessions persist in the docked composer.
+                    </p>
+                </div>
+
+                <!-- Bluesky Settings -->
+                <div class="bg-gradient-to-r from-blue-900/30 to-blue-800/20 rounded-xl p-4 border border-blue-700/30">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-cloud text-white text-sm"></i>
+                        </div>
+                        <span class="font-medium text-white">Bluesky</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Handle</label>
+                            <input type="text" id="bskyHandle" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" placeholder="yourname.bsky.social">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">App Password</label>
+                            <input type="password" id="bskyPassword" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" placeholder="Enter App Password">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- YouTube Settings -->
+                <div class="bg-gradient-to-r from-red-900/30 to-red-800/20 rounded-xl p-4 border border-red-700/30">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
+                            <i class="fab fa-youtube text-white text-sm"></i>
+                        </div>
+                        <span class="font-medium text-white">YouTube Community</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Channel ID</label>
+                            <input type="text" id="ytChannelId" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-red-500" placeholder="UC...">
+                        </div>
                         <p class="text-xs text-gray-400">
-                            Chaos Foundry Tech Division Research Project
+                            Posting requires OAuth. We open Studio and paste instead.
                         </p>
                     </div>
                 </div>
-                <!-- Connecting Services  -->
-                <div class="flex items-center gap-2 text-sm">
-                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                    <span class="text-gray-400" id="status">Ready</span>
+
+                <!-- Legacy X/Twitter Note -->
+                <div class="bg-gradient-to-r from-gray-800/30 to-gray-900/30 rounded-xl p-4 border border-gray-700/60">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                            <i class="fab fa-x-twitter text-white text-sm"></i>
+                        </div>
+                        <span class="font-medium text-white">X / Twitter</span>
+                    </div>
+                    <p class="text-xs text-gray-400">
+                        Uses the official intent composer to avoid paid API costs.
+                    </p>
                 </div>
+
+                <!-- X/Twitter Settings (removed paid API fields) -->
+                <div class="hidden"></div>
+
+                <!-- Legacy fields removed below -->
             </div>
-        </header>
-        <!-- Main content -->
-        <main class="max-w-4xl mx-auto px-4 py-8">
-            <!--Platform Selection -->
-            <div
-                class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10 mb-6"
-            >
-                <h2 class="text-white font-semibold mb-4">Pick your Poison</h2>
-                <div class="grid grid-cols-3 gap-4">
-                    <!-- X/Twitter -->
-                    <label
-                        class="cursor-pointer bg-gray-800/50 rounded-xl p-4 border border-white/5 hover:border-blue-500/50"
-                    >
-                        <input
-                            type="checkbox"
-                            id="platform-x"
-                            class="hidden"
-                            checked
-                        />
-                        <div class="flex items-center gap-3">
-                            <i class="fab fa-x-twitter text-white text-xl"></i>
-                            <span class="text-white">Twitter/X</span>
-                        </div>
-                    </label>
-                    <!--Bsky-->
-                    <label
-                        class="cursor-pointer bg-gray-800/50 rounded-xl p-4 border border-white/5 hover:border-blue-400/50"
-                    >
-                        <input
-                            type="checkbox"
-                            id="platform-bluesky"
-                            class="hidden"
-                            checked
-                        />
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-cloud text-blue-400 text-xl"></i>
-                            <span class="text-white">Bsky</span>
-                        </div>
-                    </label>
-                    <!--YouTube-->
-                    <label
-                        class="cursor-pointer bg-gray-800/50 rounded-xl p-4 border border-white/5 hover:border-red-500/50"
-                    >
-                        <input
-                            type="checkbox"
-                            id="platform-youtube"
-                            class="hidden"
-                        />
-                        <div class="flex items-center gap-3">
-                            <i class="fab fa-youtube text-red-500 text-xl"></i>
-                            <span class="text-white">YouTube</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-            <!--Post editor-->
-            <div
-                class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10"
-            >
-                <h2 class="text-white font-semibold mb-4">
-                    Compose your message
-                </h2>
-                <!--Textarea-->
-                <textarea
-                    id="postContent"
-                    rows="6"
-                    class="w-full bg-gray-900/50 border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 resize-none"
-                    placeholder="What's Happening?"
-                ></textarea>
-                <!--Character Counts-->
-                <div class="flex gap-4 mt-3 text-sm text-gray-400">
-                    <span id="charX">X: 0/280</span>
-                    <span id="charBsky">Bluesky: 0/300</span>
-                    <span id="charYT">YouTube: 0/2200</span>
-                </div>
-                <!-- Publish Button -->
-                <button
-                    id="publishBtn"
-                    class="mt-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-xl"
-                >
-                    <i class="fas fa-paper-plane mr-2"></i>
-                    Publish Transmission
+            <div class="p-6 border-t border-white/10 flex justify-end gap-3">
+                <button onclick="closeSettings()" class="px-4 py-2 text-gray-400 hover:text-white transition">Cancel</button>
+                <button onclick="saveApiSettings()" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition">
+                    Save Settings
                 </button>
             </div>
-        </main>
-        <script>
-            //Find the bridge
-            let pyBridge = null;
-            //init QWeb to Py
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+    <script>
+        // State
+        let postHistory = JSON.parse(localStorage.getItem('unifiedPublisherHistory') || '[]');
+        let currentImage = null;
+        let apiSettings = JSON.parse(localStorage.getItem('unifiedPublisherApiSettings') || '{}');
+        const API_CAPABILITIES = {
+            bluesky: { enabled: true, label: 'Bluesky' },
+            x: { enabled: false, label: 'X/Twitter' },
+            youtube: { enabled: false, label: 'YouTube' }
+        };
+        let pyBridge = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadApiSettings();
+            renderHistory();
+            updateCharCounts();
+            setupCheckboxListeners();
+        });
+
+        // Connect to Qt bridge
+        if (typeof QWebChannel !== 'undefined' && typeof qt !== 'undefined') {
             new QWebChannel(qt.webChannelTransport, function (channel) {
-                //Get PyBridge Obj
                 pyBridge = channel.objects.pyBridge;
 
-                console.log("QWebChannel connected, let's gooooooo!");
-                //Test It
-                const response = pyBridge.testConnection(
-                    "What's good JS?",
-                    "Frontend",
-                );
-                console.log("Python says:", response);
-                //Listening for results
-                pyBridge.operationFinished.connect(
-                    function (platform, success, message) {
-                        console.log(
-                            `${platform}: ${success ? "✅" : "❌"} ${message}`,
-                        );
-                        document.getElementById("status").textContent =
-                            `${platform}: ${message}`;
-                    },
-                );
+                if (pyBridge && pyBridge.operationFinished) {
+                    pyBridge.operationFinished.connect(function (platform, success, message) {
+                        showToast(`${platform}: ${message}`, success ? 'success' : 'error');
+                        document.getElementById('status').textContent = `${platform}: ${message}`;
+                    });
+                }
             });
+        }
 
-            // Character counter
-            document
-                .getElementById("postContent")
-                .addEventListener("input", function (e) {
-                    const len = e.target.value.length;
-                    document.getElementById("charX").textContent =
-                        `X: ${len}/280`;
-                    document.getElementById("charBsky").textContent =
-                        `Bluesky: ${len}/300`;
-                    document.getElementById("charYT").textContent =
-                        `YouTube: ${len}/2200`;
+        // Checkbox styling
+        function setupCheckboxListeners() {
+            document.querySelectorAll('input.platform-toggle').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const indicator = this.parentElement.querySelector('.check-indicator');
+                    if (!indicator) return;
+                    const checkIcon = indicator.querySelector('i');
+
+                    if (this.checked) {
+                        indicator.classList.remove('border-gray-600');
+                        indicator.classList.add('border-blue-500', 'bg-blue-500');
+                        checkIcon.classList.remove('hidden');
+                        this.parentElement.classList.add('ring-2', 'ring-blue-500/30');
+                    } else {
+                        indicator.classList.add('border-gray-600');
+                        indicator.classList.remove('border-blue-500', 'bg-blue-500');
+                        checkIcon.classList.add('hidden');
+                        this.parentElement.classList.remove('ring-2', 'ring-blue-500/30');
+                    }
                 });
 
-            // Publish button
-            document
-                .getElementById("publishBtn")
-                .addEventListener("click", function () {
-                    const content = document
-                        .getElementById("postContent")
-                        .value.trim();
+                // Trigger initial state
+                checkbox.dispatchEvent(new Event('change'));
+            });
+        }
 
-                    if (!content) {
-                        alert("Please write something first!");
-                        return;
+        // Update character counts
+        function updateCharCounts() {
+            const content = document.getElementById('postContent').value;
+            const len = content.length;
+
+            // X/Twitter
+            const xCount = document.querySelector('#charCountX span');
+            const xEl = document.getElementById('charCountX');
+            xCount.textContent = len;
+            xEl.className = 'char-count text-sm';
+            if (len > 260) xEl.classList.add('warning');
+            if (len > 280) xEl.classList.add('danger');
+
+            // Bluesky
+            const bskyCount = document.querySelector('#charCountBluesky span');
+            const bskyEl = document.getElementById('charCountBluesky');
+            bskyCount.textContent = len;
+            bskyEl.className = 'char-count text-sm';
+            if (len > 280) bskyEl.classList.add('warning');
+            if (len > 300) bskyEl.classList.add('danger');
+
+            // YouTube
+            const ytCount = document.querySelector('#charCountYoutube span');
+            const ytEl = document.getElementById('charCountYoutube');
+            ytCount.textContent = len;
+            ytEl.className = 'char-count text-sm';
+            if (len > 2000) ytEl.classList.add('warning');
+            if (len > 2200) ytEl.classList.add('danger');
+
+            // Update previews
+            updatePreviews();
+
+            // Update selected count
+            const selectedCount = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            document.getElementById('selectedCount').textContent = `${selectedCount} platform${selectedCount !== 1 ? 's' : ''} selected`;
+
+            // Show/hide preview cards
+            document.getElementById('previewX').style.display = document.getElementById('platform-x').checked ? 'block' : 'none';
+            document.getElementById('previewBluesky').style.display = document.getElementById('platform-bluesky').checked ? 'block' : 'none';
+            document.getElementById('previewYoutube').style.display = document.getElementById('platform-youtube').checked ? 'block' : 'none';
+        }
+
+        // Update previews
+        function updatePreviews() {
+            const content = document.getElementById('postContent').value;
+            const escapedContent = escapeHtml(content);
+
+            document.getElementById('previewXText').innerHTML = escapedContent || '<span class="text-gray-500">Your post will appear here...</span>';
+            document.getElementById('previewBlueskyText').innerHTML = escapedContent || '<span class="text-gray-500">Your post will appear here...</span>';
+            document.getElementById('previewYoutubeText').innerHTML = escapedContent || '<span class="text-gray-500">Your post will appear here...</span>';
+
+            // Image previews
+            if (currentImage) {
+                document.getElementById('previewXImage').innerHTML = `<img src="${currentImage}" class="preview-image" alt="Post image">`;
+                document.getElementById('previewXImage').classList.remove('hidden');
+                document.getElementById('previewBlueskyImage').innerHTML = `<img src="${currentImage}" class="preview-image" alt="Post image">`;
+                document.getElementById('previewBlueskyImage').classList.remove('hidden');
+                document.getElementById('previewYoutubeImage').innerHTML = `<img src="${currentImage}" class="preview-image" alt="Post image">`;
+                document.getElementById('previewYoutubeImage').classList.remove('hidden');
+            } else {
+                document.getElementById('previewXImage').classList.add('hidden');
+                document.getElementById('previewBlueskyImage').classList.add('hidden');
+                document.getElementById('previewYoutubeImage').classList.add('hidden');
+            }
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Insert formatting tags
+        function insertTag(tag) {
+            const textarea = document.getElementById('postContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selected = text.substring(start, end);
+
+            let replacement = '';
+            switch(tag) {
+                case 'bold':
+                    replacement = `**${selected || 'bold text'}**`;
+                    break;
+                case 'italic':
+                    replacement = `*${selected || 'italic text'}*`;
+                    break;
+                case 'link':
+                    replacement = `[${selected || 'link text'}](url)`;
+                    break;
+            }
+
+            textarea.value = text.substring(0, start) + replacement + text.substring(end);
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = start + replacement.length;
+            updateCharCounts();
+        }
+
+        // Handle image upload
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImage = e.target.result;
+                    document.getElementById('previewImg').src = currentImage;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                    updatePreviews();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Remove image
+        function removeImage() {
+            currentImage = null;
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('imageInput').value = '';
+            updatePreviews();
+        }
+
+        // Publish post
+        async function publishPost() {
+            const content = document.getElementById('postContent').value.trim();
+            if (!content) {
+                showToast('Please enter some content', 'error');
+                return;
+            }
+
+            const platforms = [];
+            if (document.getElementById('platform-x').checked) platforms.push('x');
+            if (document.getElementById('platform-bluesky').checked) platforms.push('bluesky');
+            if (document.getElementById('platform-youtube').checked) platforms.push('youtube');
+
+            if (platforms.length === 0) {
+                showToast('Please select at least one platform', 'error');
+                return;
+            }
+
+            // Validate character limits
+            const limits = { x: 280, bluesky: 300, youtube: 2200 };
+            for (const platform of platforms) {
+                if (content.length > limits[platform]) {
+                    showToast(`Content exceeds ${platform} character limit`, 'error');
+                    return;
+                }
+            }
+
+            const supportedPlatforms = platforms.filter(platform => API_CAPABILITIES[platform]?.enabled);
+            const unsupportedPlatforms = platforms.filter(platform => !API_CAPABILITIES[platform]?.enabled);
+
+            if (supportedPlatforms.length === 0 && unsupportedPlatforms.length > 0) {
+                showToast('Opening composers for selected platforms.', 'info');
+            } else if (unsupportedPlatforms.length > 0) {
+                showToast('Opening composers for non-API platforms.', 'info');
+            }
+
+            // Disable button
+            const btn = document.getElementById('publishBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing...';
+
+            const payload = {
+                content: content,
+                platforms: supportedPlatforms,
+                image: currentImage,
+                credentials: apiSettings
+            };
+
+            if (supportedPlatforms.length > 0 && pyBridge && pyBridge.handlePublishRequest) {
+                pyBridge.handlePublishRequest(JSON.stringify(payload));
+            }
+
+            if (unsupportedPlatforms.length > 0) {
+                unsupportedPlatforms.forEach(platform => openComposer(platform, content));
+            }
+
+            // Add to history
+            const postRecord = {
+                id: Date.now(),
+                content,
+                image: currentImage,
+                platforms,
+                results: platforms.map(platform => ({
+                    platform,
+                    success: API_CAPABILITIES[platform]?.enabled && !!pyBridge,
+                    id: Date.now() + Math.random(),
+                    skipped: !API_CAPABILITIES[platform]?.enabled
+                })),
+                timestamp: new Date().toISOString()
+            };
+
+            postHistory.unshift(postRecord);
+            if (postHistory.length > 50) postHistory.pop();
+            localStorage.setItem('unifiedPublisherHistory', JSON.stringify(postHistory));
+
+            // Reset UI
+            document.getElementById('postContent').value = '';
+            removeImage();
+            renderHistory();
+            updateStats();
+
+            // Re-enable button
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Publish Transmission</span>';
+        }
+
+        // Render history
+        function renderHistory() {
+            const container = document.getElementById('historyContainer');
+
+            if (postHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-inbox text-4xl mb-3 opacity-50"></i>
+                        <p class="text-sm">No posts yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = postHistory.slice(0, 10).map(post => {
+                const date = new Date(post.timestamp);
+                const timeStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const platformIcons = post.platforms.map(p => {
+                    switch(p) {
+                        case 'x': return '<i class="fab fa-x-twitter text-gray-400"></i>';
+                        case 'bluesky': return '<i class="fas fa-cloud text-blue-400"></i>';
+                        case 'youtube': return '<i class="fab fa-youtube text-red-500"></i>';
+                        default: return '';
                     }
+                }).join(' ');
 
-                    // Gather selected platforms
-                    const platforms = [];
-                    if (document.getElementById("platform-x").checked)
-                        platforms.push("x");
-                    if (document.getElementById("platform-bluesky").checked)
-                        platforms.push("bluesky");
-                    if (document.getElementById("platform-youtube").checked)
-                        platforms.push("youtube");
-
-                    if (platforms.length === 0) {
-                        alert("Please select at least one platform!");
-                        return;
+                const results = post.results.map(r => {
+                    if (r.skipped) {
+                        return '<i class="fas fa-minus-circle text-gray-400"></i>';
                     }
+                    return r.success
+                        ? '<i class="fas fa-check-circle text-green-400"></i>'
+                        : '<i class="fas fa-exclamation-circle text-red-400"></i>';
+                }).join(' ');
 
-                    // Send to Python
-                    const data = {
-                        content: content,
-                        platforms: platforms,
-                        image: null,
-                        credentials: {}, // Will add real creds later
-                    };
+                return `
+                    <div class="history-item p-3 bg-gray-800/50 rounded-lg cursor-pointer" onclick="viewPost(${post.id})">
+                        <div class="flex items-start gap-2">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-white text-sm truncate">${escapeHtml(post.content.substring(0, 50))}${post.content.length > 50 ? '...' : ''}</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-gray-500">${timeStr}</span>
+                                    <span class="text-xs text-gray-600">&middot;</span>
+                                    <span class="text-xs text-gray-500">${platformIcons}</span>
+                                    <span class="text-xs text-gray-600">&middot;</span>
+                                    <span>${results}</span>
+                                </div>
+                            </div>
+                            ${post.image ? '<i class="fas fa-image text-gray-500 text-xs"></i>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
-                    console.log("📤 Sending to Python:", data);
-                    pyBridge.handlePublishRequest(JSON.stringify(data));
-                });
-        </script>
-    </body>
+        // View post details
+        function viewPost(id) {
+            const post = postHistory.find(p => p.id === id);
+            if (!post) return;
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-gray-900 rounded-2xl w-full max-w-md border border-white/10">
+                    <div class="p-4 border-b border-white/10 flex items-center justify-between">
+                        <h3 class="font-semibold text-white">Post Details</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="p-4 space-y-4">
+                        <div class="text-sm text-gray-400">${new Date(post.timestamp).toLocaleString()}</div>
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <p class="text-white whitespace-pre-wrap">${escapeHtml(post.content)}</p>
+                            ${post.image ? `<img src="${post.image}" class="mt-3 rounded-lg max-h-48" alt="Post image">` : ''}
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-400 mb-2">Platforms & Status:</div>
+                            <div class="flex flex-wrap gap-2">
+                                ${post.results.map(r => `
+                                    <span class="px-3 py-1 rounded-full text-sm ${r.skipped ? 'bg-gray-500/20 text-gray-300' : r.success ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                                        ${r.platform.toUpperCase()} - ${r.skipped ? 'Skipped' : r.success ? 'Success' : 'Failed'}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Clear history
+        function clearHistory() {
+            if (confirm('Clear all post history?')) {
+                postHistory = [];
+                localStorage.setItem('unifiedPublisherHistory', JSON.stringify(postHistory));
+                renderHistory();
+                updateStats();
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            const today = new Date().toDateString();
+            const todayPosts = postHistory.filter(p => new Date(p.timestamp).toDateString() === today);
+
+            document.getElementById('postsToday').textContent = todayPosts.length;
+            document.getElementById('reactionsToday').textContent = Math.floor(Math.random() * 50);
+            document.getElementById('platformsReached').textContent = new Set(postHistory.flatMap(p => p.platforms)).size;
+            document.getElementById('timeSaved').textContent = `~${todayPosts.length * 3}m`;
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+
+            const icons = {
+                success: 'fa-check',
+                error: 'fa-times',
+                warning: 'fa-exclamation',
+                info: 'fa-info'
+            };
+
+            toast.className = `toast ${colors[type]} text-white px-4 py-3 rounded-lg flex items-center gap-2 shadow-lg`;
+            toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function copyPostContent() {
+            const content = document.getElementById('postContent').value;
+            if (!content) {
+                showToast('Nothing to copy yet', 'warning');
+                return;
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(content)
+                    .then(() => showToast('Copied to clipboard', 'success'))
+                    .catch(() => fallbackCopyContent(content));
+            } else {
+                fallbackCopyContent(content);
+            }
+        }
+
+        function fallbackCopyContent(content) {
+            const textarea = document.getElementById('postContent');
+            textarea.focus();
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Copied to clipboard', 'success');
+            } catch (err) {
+                showToast('Copy failed. Please select and copy manually.', 'error');
+            }
+        }
+
+        function openComposer(platform, contentOverride = null) {
+            const content = document.getElementById('postContent').value;
+            const textToUse = contentOverride !== null ? contentOverride : content;
+
+            let url = '';
+            if (platform === 'x') {
+                if (textToUse) {
+                    const encoded = encodeURIComponent(textToUse);
+                    url = `https://twitter.com/intent/tweet?text=${encoded}`;
+                } else {
+                    url = 'https://twitter.com/compose/tweet';
+                }
+            } else if (platform === 'youtube') {
+                const channelId = apiSettings.youtube?.channelId;
+                url = channelId
+                    ? `https://studio.youtube.com/channel/${channelId}/community`
+                    : 'https://studio.youtube.com/';
+            }
+
+            if (!url) return;
+
+            const useInternalComposer = apiSettings.preferences?.openComposersInternal;
+            if (useInternalComposer && pyBridge && pyBridge.openInternalUrl) {
+                pyBridge.openInternalUrl(url);
+            } else if (pyBridge && pyBridge.openExternalUrl) {
+                pyBridge.openExternalUrl(url);
+            } else {
+                window.open(url, '_blank', 'noopener');
+            }
+        }
+
+        function openLogin(platform) {
+            let url = '';
+            if (platform === 'x') {
+                url = 'https://twitter.com/login';
+            } else if (platform === 'youtube') {
+                url = 'https://studio.youtube.com/';
+            }
+
+            if (!url) return;
+
+            const useInternalComposer = apiSettings.preferences?.openComposersInternal;
+            if (useInternalComposer && pyBridge && pyBridge.openInternalUrl) {
+                pyBridge.openInternalUrl(url);
+            } else if (pyBridge && pyBridge.openExternalUrl) {
+                pyBridge.openExternalUrl(url);
+            } else {
+                window.open(url, '_blank', 'noopener');
+            }
+        }
+
+        // Settings modal
+        function openSettings() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function openApiKeys() {
+            openSettings();
+        }
+
+        // Save API settings
+        function saveApiSettings() {
+            apiSettings = {
+                bluesky: {
+                    handle: document.getElementById('bskyHandle').value,
+                    password: document.getElementById('bskyPassword').value
+                },
+                youtube: {
+                    channelId: document.getElementById('ytChannelId').value
+                },
+                preferences: {
+                    openComposersInternal: document.getElementById('openComposersInternal').checked
+                }
+            };
+
+            localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+            updatePreviewIdentity();
+            closeSettings();
+            showToast('API settings saved!', 'success');
+        }
+
+        // Load API settings
+        function loadApiSettings() {
+            if (apiSettings.bluesky?.handle) document.getElementById('bskyHandle').value = apiSettings.bluesky.handle;
+            if (apiSettings.bluesky?.password) document.getElementById('bskyPassword').value = apiSettings.bluesky.password;
+            if (apiSettings.youtube?.channelId) document.getElementById('ytChannelId').value = apiSettings.youtube.channelId;
+            const internalPreference = apiSettings.preferences?.openComposersInternal;
+            document.getElementById('openComposersInternal').checked = internalPreference !== false;
+            updatePreviewIdentity();
+        }
+
+        // Close modal on outside click
+        document.getElementById('settingsModal').addEventListener('click', function(e) {
+            if (e.target === this) closeSettings();
+        });
+
+        // Initialize stats
+        updateStats();
+
+        function updatePreviewIdentity() {
+            const xHandle = (apiSettings.x?.handle || '').trim();
+            if (xHandle) {
+                const cleanX = xHandle.startsWith('@') ? xHandle.slice(1) : xHandle;
+                document.getElementById('previewXName').textContent = cleanX || 'Your Name';
+                document.getElementById('previewXHandle').textContent = `@${cleanX}`;
+            } else {
+                document.getElementById('previewXName').textContent = 'Your Name';
+                document.getElementById('previewXHandle').textContent = '@handle';
+            }
+
+            const bskyHandle = (apiSettings.bluesky?.handle || '').trim();
+            if (bskyHandle) {
+                const cleanBsky = bskyHandle.startsWith('@') ? bskyHandle.slice(1) : bskyHandle;
+                const displayName = cleanBsky.split('.')[0] || cleanBsky;
+                document.getElementById('previewBlueskyName').textContent = displayName || 'Bluesky User';
+                document.getElementById('previewBlueskyHandle').textContent = `@${cleanBsky}`;
+            } else {
+                document.getElementById('previewBlueskyName').textContent = 'Your Name';
+                document.getElementById('previewBlueskyHandle').textContent = '@handle.bsky.social';
+            }
+
+            const ytChannelId = (apiSettings.youtube?.channelId || '').trim();
+            document.getElementById('previewYoutubeName').textContent = ytChannelId ? 'Your Channel' : 'Your Channel';
+            document.getElementById('previewYoutubeHandle').textContent = ytChannelId || 'YouTube';
+        }
+    </script>
+</body>
 </html>
