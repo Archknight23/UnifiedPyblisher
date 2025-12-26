@@ -15,27 +15,25 @@
 5. ✅ Created `requirements.txt`
 
 ## 🔄 Currently Working On
-- Creating `index.html` with QWebChannel integration
+- Docked composer + safer X/YT flow (no paid API)
 
 ## 📋 Next Steps
-1. **Create index.html**:
-   - Use Minmax prototype HTML as base
-   - Add QWebChannel JavaScript CDN: `<script src="qrc:///qtwebchannel/qwebchannel.js"></script>`
-   - Modify publishPost() function to call Python via QWebChannel
-   - Add listener for Python's operationFinished signal
-   
-2. **Create API stubs** (implement later):
-   - `publisherlogic/api_bluesky.py`
-   - `publisherlogic/api_twitter.py` 
-   - `publisherlogic/api_youtube.py`
+1. **Test docked composer + external fallback**:
+   - Ensure X opens in docked panel when enabled
+   - Ensure YouTube forces external (Google blocks embedded login)
+   - Verify “Composer Launched” panel shows URL + copy button
 
-3. **Test the app**:
-   ```bash
-   cd ~/UnifiedPyblisher
-   python -m publisherlogic.main
-   ```
+2. **Stability fixes**:
+   - If X login fails embedded, auto-open external instead
+   - Add clear UI hint when external composer opens
 
-4. **Implement real Bluesky API** (easiest first)
+3. **Bluesky API**:
+   - Install `atproto` dependency
+   - Verify successful post + error handling
+
+4. **Optional polish**:
+   - Add X handle field for preview (no API)
+   - Add tabs/switcher in docked composer
 
 5. **Git commit and push**
 
@@ -102,3 +100,22 @@ UnifiedPyblisher/
 - Learning by writing code herself
 - Keep explanations concise
 - Update this file as we progress
+
+## Testing Commands
+```bash
+cd ~/UnifiedPyblisher
+python -m publisherlogic.main
+```
+
+## Known Constraints
+- YouTube login often fails inside embedded webviews (Google/FedCM); force external browser.
+- X can work embedded but may still require external fallback depending on login policies.
+- YouTube Data API does not support Community posts; Studio paste flow is required.
+
+## Recent Changes (Session 2)
+- Added docked composer panel inside the main window (right side).
+- Added persistent web profile for composer logins.
+- Added Settings login buttons for X/YouTube.
+- Added “Force YouTube to open external” setting (default on).
+- Added “Composer Launched” panel with URL + copy button.
+- Updated preview to reflect saved creds (Bluesky handle, YouTube channel ID).

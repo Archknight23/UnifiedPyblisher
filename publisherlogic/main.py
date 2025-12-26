@@ -80,8 +80,11 @@ class Bridge(QObject):
     @pyqtSlot(str, result=bool)
     def openExternalUrl(self, url):
         """Open an external URL in the user's default browser."""
+        print(f"[Bridge] openExternalUrl called with: {url}")
         try:
-            return QDesktopServices.openUrl(QUrl(url))
+            result = QDesktopServices.openUrl(QUrl(url))
+            print(f"[Bridge] External URL opened: {result}")
+            return result
         except Exception as err:
             print(f"[Bridge] Failed to open URL: {err}")
             return False
@@ -89,9 +92,13 @@ class Bridge(QObject):
     @pyqtSlot(str, result=bool)
     def openInternalUrl(self, url):
         """Open a URL inside the app via a docked composer panel."""
+        print(f"[Bridge] openInternalUrl called with: {url}")
         if not self.main_window:
+            print("[Bridge] No main window reference!")
             return False
-        return self.main_window.open_docked_url(url)
+        result = self.main_window.open_docked_url(url)
+        print(f"[Bridge] Internal URL opened: {result}")
+        return result
 
 
 class UnifiedWindow(QMainWindow):
@@ -157,16 +164,16 @@ class UnifiedWindow(QMainWindow):
         self.composer_container.setVisible(False)
 
         # Setup Layout
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.addWidget(self.browser)
-        splitter.addWidget(self.composer_container)
-        splitter.setStretchFactor(0, 3)
-        splitter.setStretchFactor(1, 1)
-        splitter.setSizes([900, 0])
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.splitter.addWidget(self.browser)
+        self.splitter.addWidget(self.composer_container)
+        self.splitter.setStretchFactor(0, 3)
+        self.splitter.setStretchFactor(1, 1)
+        self.splitter.setSizes([900, 0])
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(splitter)
+        layout.addWidget(self.splitter)
 
         container = QWidget()
         container.setLayout(layout)
@@ -183,15 +190,27 @@ class UnifiedWindow(QMainWindow):
     def open_docked_url(self, url):
         """Open a URL inside the docked composer panel."""
         try:
+            print(f"[Bridge] Setting composer URL to: {url}")
             self.composer_view.setUrl(QUrl(url))
+            print(f"[Bridge] Making composer visible...")
             self.composer_container.setVisible(True)
+            # Resize splitter to actually show the composer
+            total_width = self.splitter.width()
+            composer_width = 700
+            self.splitter.setSizes([total_width - composer_width, composer_width])
+            print(f"[Bridge] Composer visible state: {self.composer_container.isVisible()}")
+            print(f"[Bridge] Splitter sizes: {self.splitter.sizes()}")
             return True
         except Exception as err:
             print(f"[Bridge] Failed to open internal URL: {err}")
             return False
 
     def hide_docked_composer(self):
+        print("[Bridge] hide_docked_composer called!")
         self.composer_container.setVisible(False)
+        # Reset splitter to hide composer
+        total_width = self.splitter.width()
+        self.splitter.setSizes([total_width, 0])
 
 
 if __name__ == "__main__":

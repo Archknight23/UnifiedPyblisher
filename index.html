@@ -76,6 +76,94 @@
         .history-item:hover {
             background-color: #f3f4f6;
         }
+
+        /* Queue animations */
+        .queue-panel {
+            animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .queue-item {
+            transition: all 0.3s ease;
+        }
+
+        .queue-item.active {
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 20px 5px rgba(59, 130, 246, 0.3);
+            }
+        }
+
+        .queue-item.completed {
+            opacity: 0.6;
+        }
+
+        .queue-item.completed .checkmark {
+            animation: checkmarkPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes checkmarkPop {
+            0% {
+                transform: scale(0) rotate(-45deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2) rotate(0deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .progress-bar-fill {
+            transition: width 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .celebrate {
+            animation: celebrate 0.6s ease-out;
+        }
+
+        @keyframes celebrate {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .queue-button {
+            transition: all 0.2s ease;
+        }
+
+        .queue-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .queue-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
@@ -335,6 +423,45 @@
                         Use Copy Content, then paste into the composer.
                     </p>
                 </div>
+                <!-- Publishing Queue Panel -->
+                <div id="queuePanel" class="hidden queue-panel bg-black/30 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
+                    <!-- Progress Bar -->
+                    <div class="h-1 bg-gray-800">
+                        <div id="queueProgressBar" class="progress-bar-fill h-full bg-gradient-to-r from-blue-500 to-purple-600" style="width: 0%"></div>
+                    </div>
+
+                    <div class="p-6">
+                        <h3 class="text-white font-semibold mb-4 flex items-center gap-2">
+                            <i class="fas fa-tasks text-blue-400"></i>
+                            Publishing Queue
+                            <span id="queueCount" class="text-xs text-gray-400 ml-auto">0/0</span>
+                        </h3>
+
+                        <!-- Queue Items Container -->
+                        <div id="queueItems" class="space-y-3 mb-4">
+                            <!-- Queue items will be inserted here -->
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div id="queueActions" class="space-y-2">
+                            <button id="queueActionBtn" onclick="handleQueueAction()" class="queue-button w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fas fa-rocket mr-2"></i>
+                                <span id="queueActionText">Start</span>
+                            </button>
+                            <button id="queueDoneBtn" onclick="markCurrentDone()" class="queue-button hidden w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-xl">
+                                <i class="fas fa-check mr-2"></i>
+                                Done - Next Platform
+                            </button>
+                        </div>
+
+                        <!-- Completion Message -->
+                        <div id="queueComplete" class="hidden text-center py-4">
+                            <div class="text-4xl mb-2">🎉</div>
+                            <p class="text-white font-semibold">All platforms posted!</p>
+                            <p class="text-xs text-gray-400 mt-1">Great work spreading the word</p>
+                        </div>
+                    </div>
+                </div>
                 <!-- Quick Stats -->
                 <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
                     <h2 class="text-white font-semibold mb-4 flex items-center gap-2">
@@ -442,6 +569,10 @@
                         <input type="checkbox" id="openComposersInternal" class="rounded border-gray-600 bg-gray-800">
                         Open X/YouTube composers inside the app
                     </label>
+                    <label class="mt-2 flex items-center gap-2 text-xs text-gray-300">
+                        <input type="checkbox" id="forceExternalYoutube" class="rounded border-gray-600 bg-gray-800" checked>
+                        Force YouTube to open in external browser
+                    </label>
                 </div>
 
                 <div class="bg-gradient-to-r from-gray-800/40 to-gray-900/40 rounded-xl p-4 border border-gray-700">
@@ -494,11 +625,11 @@
                     </div>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-xs text-gray-400 block mb-1">Channel ID</label>
-                            <input type="text" id="ytChannelId" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-red-500" placeholder="UC...">
+                            <label class="text-xs text-gray-400 block mb-1">Channel Handle</label>
+                            <input type="text" id="ytChannelId" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-red-500" placeholder="ChaosFoundry">
                         </div>
                         <p class="text-xs text-gray-400">
-                            Posting requires OAuth. We open Studio and paste instead.
+                            Enter your handle (without @). Opens your community tab for posting.
                         </p>
                     </div>
                 </div>
@@ -545,6 +676,12 @@
         };
         let pyBridge = null;
 
+        // Queue System State
+        let publishQueue = [];
+        let currentQueueIndex = -1;
+        let queueContent = '';
+        let queueImage = null;
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadApiSettings();
@@ -557,6 +694,14 @@
         if (typeof QWebChannel !== 'undefined' && typeof qt !== 'undefined') {
             new QWebChannel(qt.webChannelTransport, function (channel) {
                 pyBridge = channel.objects.pyBridge;
+
+                // Debug: Log available methods
+                if (pyBridge) {
+                    console.log('[Bridge] Connected! Available methods:', Object.keys(pyBridge));
+                    // Check specific methods
+                    console.log('[Bridge] Has openInternalUrl?', typeof pyBridge.openInternalUrl);
+                    console.log('[Bridge] Has openExternalUrl?', typeof pyBridge.openExternalUrl);
+                }
 
                 if (pyBridge && pyBridge.operationFinished) {
                     pyBridge.operationFinished.connect(function (platform, success, message) {
@@ -626,7 +771,7 @@
             updatePreviews();
 
             // Update selected count
-            const selectedCount = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            const selectedCount = document.querySelectorAll('input.platform-toggle:checked').length;
             document.getElementById('selectedCount').textContent = `${selectedCount} platform${selectedCount !== 1 ? 's' : ''} selected`;
 
             // Show/hide preview cards
@@ -744,33 +889,25 @@
             }
 
             const supportedPlatforms = platforms.filter(platform => API_CAPABILITIES[platform]?.enabled);
-            const unsupportedPlatforms = platforms.filter(platform => !API_CAPABILITIES[platform]?.enabled);
-
-            if (supportedPlatforms.length === 0 && unsupportedPlatforms.length > 0) {
-                showToast('Opening composers for selected platforms.', 'info');
-            } else if (unsupportedPlatforms.length > 0) {
-                showToast('Opening composers for non-API platforms.', 'info');
-            }
 
             // Disable button
             const btn = document.getElementById('publishBtn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing...';
 
-            const payload = {
-                content: content,
-                platforms: supportedPlatforms,
-                image: currentImage,
-                credentials: apiSettings
-            };
-
+            // Handle API platforms (Bluesky)
             if (supportedPlatforms.length > 0 && pyBridge && pyBridge.handlePublishRequest) {
+                const payload = {
+                    content: content,
+                    platforms: supportedPlatforms,
+                    image: currentImage,
+                    credentials: apiSettings
+                };
                 pyBridge.handlePublishRequest(JSON.stringify(payload));
             }
 
-            if (unsupportedPlatforms.length > 0) {
-                unsupportedPlatforms.forEach(platform => openComposer(platform, content));
-            }
+            // Initialize queue for all platforms
+            initializeQueue(platforms, content, currentImage);
 
             // Add to history
             const postRecord = {
@@ -946,6 +1083,269 @@
             }, 3000);
         }
 
+        // Queue System Functions
+        function initializeQueue(platforms, content, image) {
+            publishQueue = platforms.map(platform => ({
+                platform,
+                status: 'pending', // 'pending', 'active', 'completed'
+                label: getPlatformLabel(platform),
+                icon: getPlatformIcon(platform),
+                color: getPlatformColor(platform),
+                isApi: API_CAPABILITIES[platform]?.enabled
+            }));
+            currentQueueIndex = -1;
+            queueContent = content;
+            queueImage = image;
+            renderQueue();
+            showQueuePanel();
+
+            // Auto-start the queue
+            setTimeout(() => startQueue(), 300);
+        }
+
+        function getPlatformLabel(platform) {
+            const labels = { x: 'X / Twitter', bluesky: 'Bluesky', youtube: 'YouTube' };
+            return labels[platform] || platform;
+        }
+
+        function getPlatformIcon(platform) {
+            const icons = {
+                x: 'fab fa-x-twitter',
+                bluesky: 'fas fa-cloud',
+                youtube: 'fab fa-youtube'
+            };
+            return icons[platform] || 'fas fa-globe';
+        }
+
+        function getPlatformColor(platform) {
+            const colors = {
+                x: 'gray',
+                bluesky: 'blue',
+                youtube: 'red'
+            };
+            return colors[platform] || 'gray';
+        }
+
+        function showQueuePanel() {
+            document.getElementById('queuePanel').classList.remove('hidden');
+        }
+
+        function hideQueuePanel() {
+            document.getElementById('queuePanel').classList.add('hidden');
+        }
+
+        function renderQueue() {
+            const container = document.getElementById('queueItems');
+            const completedCount = publishQueue.filter(item => item.status === 'completed').length;
+            const totalCount = publishQueue.length;
+            const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
+            // Update progress bar
+            document.getElementById('queueProgressBar').style.width = progressPercent + '%';
+            document.getElementById('queueCount').textContent = `${completedCount}/${totalCount}`;
+
+            console.log('[Queue] Rendering queue:', publishQueue.map(i => `${i.platform}:${i.status}`).join(', '));
+
+            // Render queue items
+            container.innerHTML = publishQueue.map((item, index) => {
+                let statusIcon = '';
+                let statusText = '';
+                let itemClass = 'queue-item';
+
+                if (item.status === 'completed') {
+                    statusIcon = '<i class="checkmark fas fa-check-circle text-green-400 text-xl"></i>';
+                    statusText = item.isApi ? 'Posted' : 'Done';
+                    itemClass += ' completed';
+                } else if (item.status === 'active') {
+                    statusIcon = '<i class="fas fa-arrow-right text-blue-400 text-xl"></i>';
+                    statusText = 'Ready';
+                    itemClass += ' active';
+                } else {
+                    statusIcon = '<i class="fas fa-clock text-gray-600 text-xl"></i>';
+                    statusText = 'Waiting';
+                }
+
+                return `
+                    <div class="${itemClass} bg-gray-800/50 rounded-xl p-4 border border-${item.color}-700/30">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-${item.color}-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="${item.icon} text-white"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-white font-medium">${item.label}</div>
+                                <div class="text-xs text-gray-400">
+                                    ${statusText} • ${item.isApi ? 'API' : 'Manual'}
+                                </div>
+                            </div>
+                            ${statusIcon}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleQueueAction() {
+            console.log('[Queue] handleQueueAction called, currentQueueIndex:', currentQueueIndex);
+            if (currentQueueIndex === -1) {
+                // Start the queue
+                console.log('[Queue] Starting queue from button click');
+                startQueue();
+            } else {
+                // Process current platform
+                console.log('[Queue] Processing current platform from button click');
+                processCurrentPlatform();
+            }
+        }
+
+        function startQueue() {
+            console.log('[Queue] Starting queue with', publishQueue.length, 'platforms');
+
+            // Auto-complete API platforms first
+            publishQueue.forEach((item, index) => {
+                if (item.isApi) {
+                    console.log('[Queue] Auto-completing API platform:', item.platform);
+                    item.status = 'completed';
+                }
+            });
+
+            // Find first non-API platform
+            currentQueueIndex = publishQueue.findIndex(item => !item.isApi);
+            console.log('[Queue] First manual platform index:', currentQueueIndex);
+
+            if (currentQueueIndex === -1) {
+                // All platforms are API-based, we're done
+                console.log('[Queue] All platforms are API-based, completing immediately');
+                completeQueue();
+            } else {
+                publishQueue[currentQueueIndex].status = 'active';
+                console.log('[Queue] Activated platform:', publishQueue[currentQueueIndex].platform);
+
+                // Force button state BEFORE rendering
+                document.getElementById('queueActionBtn').classList.remove('hidden');
+                document.getElementById('queueDoneBtn').classList.add('hidden');
+                document.getElementById('queueActionText').textContent = `Open ${publishQueue[currentQueueIndex].label}`;
+
+                renderQueue();
+            }
+        }
+
+        function processCurrentPlatform() {
+            if (currentQueueIndex < 0 || currentQueueIndex >= publishQueue.length) {
+                console.log('[Queue] Invalid queue index:', currentQueueIndex);
+                return;
+            }
+
+            const current = publishQueue[currentQueueIndex];
+            console.log('[Queue] Processing platform:', current.platform);
+
+            if (current.platform === 'youtube') {
+                // Copy text to clipboard
+                copyTextToClipboard(queueContent);
+                showToast('✓ Text copied - paste in YouTube Studio', 'success');
+            }
+
+            // Open composer
+            console.log('[Queue] Opening composer for:', current.platform, 'with content:', queueContent);
+            openComposer(current.platform, queueContent);
+
+            // Show "Done" button
+            document.getElementById('queueActionBtn').classList.add('hidden');
+            document.getElementById('queueDoneBtn').classList.remove('hidden');
+        }
+
+        function markCurrentDone() {
+            if (currentQueueIndex < 0 || currentQueueIndex >= publishQueue.length) {
+                console.log('[Queue] markCurrentDone called with invalid index:', currentQueueIndex);
+                return;
+            }
+
+            const current = publishQueue[currentQueueIndex];
+            console.log('[Queue] Marking platform as done:', current.platform);
+
+            // Mark current as completed
+            publishQueue[currentQueueIndex].status = 'completed';
+
+            // Move to next platform
+            currentQueueIndex++;
+            console.log('[Queue] Moving to next index:', currentQueueIndex);
+
+            // Find next non-completed platform
+            while (currentQueueIndex < publishQueue.length && publishQueue[currentQueueIndex].status === 'completed') {
+                console.log('[Queue] Skipping already completed platform at index:', currentQueueIndex);
+                currentQueueIndex++;
+            }
+
+            if (currentQueueIndex >= publishQueue.length) {
+                // All done!
+                console.log('[Queue] All platforms processed, completing queue');
+                completeQueue();
+            } else {
+                // Activate next platform
+                console.log('[Queue] Activating next platform:', publishQueue[currentQueueIndex].platform);
+                publishQueue[currentQueueIndex].status = 'active';
+
+                // Force button state for next platform
+                document.getElementById('queueActionBtn').classList.remove('hidden');
+                document.getElementById('queueDoneBtn').classList.add('hidden');
+                document.getElementById('queueActionText').textContent = `Open ${publishQueue[currentQueueIndex].label}`;
+
+                renderQueue();
+            }
+        }
+
+        function completeQueue() {
+            console.log('[Queue] Queue complete! Final statuses:', publishQueue.map(i => `${i.platform}:${i.status}`).join(', '));
+            renderQueue();
+            document.getElementById('queueActions').classList.add('hidden');
+            document.getElementById('queueComplete').classList.remove('hidden');
+            document.getElementById('queuePanel').classList.add('celebrate');
+
+            setTimeout(() => {
+                document.getElementById('queuePanel').classList.remove('celebrate');
+            }, 600);
+
+            // Auto-hide after 10 seconds (increased from 5)
+            setTimeout(() => {
+                console.log('[Queue] Auto-hiding queue panel');
+                resetQueue();
+            }, 10000);
+        }
+
+        function resetQueue() {
+            publishQueue = [];
+            currentQueueIndex = -1;
+            queueContent = '';
+            queueImage = null;
+            hideQueuePanel();
+            document.getElementById('queueActions').classList.remove('hidden');
+            document.getElementById('queueComplete').classList.add('hidden');
+            document.getElementById('queueActionBtn').classList.remove('hidden');
+            document.getElementById('queueDoneBtn').classList.add('hidden');
+        }
+
+        function updateQueueButtons() {
+            const current = publishQueue[currentQueueIndex];
+            if (!current) return;
+
+            const actionBtn = document.getElementById('queueActionBtn');
+            const actionText = document.getElementById('queueActionText');
+
+            actionBtn.classList.remove('hidden');
+            document.getElementById('queueDoneBtn').classList.add('hidden');
+
+            actionText.textContent = `Open ${current.label}`;
+        }
+
+        function copyTextToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).catch(() => {
+                    fallbackCopyContent(text);
+                });
+            } else {
+                fallbackCopyContent(text);
+            }
+        }
+
         function copyPostContent() {
             const content = document.getElementById('postContent').value;
             if (!content) {
@@ -975,32 +1375,44 @@
         }
 
         function openComposer(platform, contentOverride = null) {
+            console.log('[Composer] Opening composer for platform:', platform);
             const content = document.getElementById('postContent').value;
             const textToUse = contentOverride !== null ? contentOverride : content;
+            console.log('[Composer] Content to use:', textToUse);
 
             let url = '';
             if (platform === 'x') {
                 if (textToUse) {
                     const encoded = encodeURIComponent(textToUse);
-                    url = `https://twitter.com/intent/tweet?text=${encoded}`;
+                    url = `https://x.com/intent/post?text=${encoded}`;
                 } else {
-                    url = 'https://twitter.com/compose/tweet';
+                    url = 'https://x.com/compose/post';
                 }
             } else if (platform === 'youtube') {
-                const channelId = apiSettings.youtube?.channelId;
-                url = channelId
-                    ? `https://studio.youtube.com/channel/${channelId}/community`
-                    : 'https://studio.youtube.com/';
+                const channelHandle = apiSettings.youtube?.channelId;
+                url = channelHandle
+                    ? `https://www.youtube.com/@${channelHandle}/community`
+                    : 'https://www.youtube.com/';
             }
 
-            if (!url) return;
+            console.log('[Composer] Generated URL:', url);
+            if (!url) {
+                console.log('[Composer] No URL generated, aborting');
+                return;
+            }
 
-            const useInternalComposer = apiSettings.preferences?.openComposersInternal;
+            const useInternalComposer = shouldUseInternalComposer(platform);
+            console.log('[Composer] Use internal composer:', useInternalComposer);
+            console.log('[Composer] pyBridge available:', !!pyBridge);
+
             if (useInternalComposer && pyBridge && pyBridge.openInternalUrl) {
+                console.log('[Composer] Opening in internal browser');
                 pyBridge.openInternalUrl(url);
             } else if (pyBridge && pyBridge.openExternalUrl) {
+                console.log('[Composer] Opening in external browser');
                 pyBridge.openExternalUrl(url);
             } else {
+                console.log('[Composer] Fallback: opening in new window');
                 window.open(url, '_blank', 'noopener');
             }
         }
@@ -1008,14 +1420,14 @@
         function openLogin(platform) {
             let url = '';
             if (platform === 'x') {
-                url = 'https://twitter.com/login';
+                url = 'https://x.com/login';
             } else if (platform === 'youtube') {
-                url = 'https://studio.youtube.com/';
+                url = 'https://www.youtube.com/';
             }
 
             if (!url) return;
 
-            const useInternalComposer = apiSettings.preferences?.openComposersInternal;
+            const useInternalComposer = shouldUseInternalComposer(platform);
             if (useInternalComposer && pyBridge && pyBridge.openInternalUrl) {
                 pyBridge.openInternalUrl(url);
             } else if (pyBridge && pyBridge.openExternalUrl) {
@@ -1049,7 +1461,8 @@
                     channelId: document.getElementById('ytChannelId').value
                 },
                 preferences: {
-                    openComposersInternal: document.getElementById('openComposersInternal').checked
+                    openComposersInternal: document.getElementById('openComposersInternal').checked,
+                    forceExternalYoutube: document.getElementById('forceExternalYoutube').checked
                 }
             };
 
@@ -1066,6 +1479,8 @@
             if (apiSettings.youtube?.channelId) document.getElementById('ytChannelId').value = apiSettings.youtube.channelId;
             const internalPreference = apiSettings.preferences?.openComposersInternal;
             document.getElementById('openComposersInternal').checked = internalPreference !== false;
+            const forceExternalPreference = apiSettings.preferences?.forceExternalYoutube;
+            document.getElementById('forceExternalYoutube').checked = forceExternalPreference !== false;
             updatePreviewIdentity();
         }
 
@@ -1101,7 +1516,17 @@
 
             const ytChannelId = (apiSettings.youtube?.channelId || '').trim();
             document.getElementById('previewYoutubeName').textContent = ytChannelId ? 'Your Channel' : 'Your Channel';
-            document.getElementById('previewYoutubeHandle').textContent = ytChannelId || 'YouTube';
+            document.getElementById('previewYoutubeHandle').textContent = ytChannelId ? `@${ytChannelId}` : 'YouTube';
+        }
+
+        function shouldUseInternalComposer(platform) {
+            const preferences = apiSettings.preferences || {};
+            const internalEnabled = preferences.openComposersInternal !== false;
+            const forceExternalYoutube = preferences.forceExternalYoutube === true;
+            if (platform === 'youtube' && forceExternalYoutube) {
+                return false;
+            }
+            return internalEnabled;
         }
     </script>
 </body>
