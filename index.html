@@ -29,15 +29,25 @@
         }
 
         .char-count {
-            transition: color 0.2s ease;
+            transition: all 0.2s ease;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e5e7eb;
+            font-weight: 500;
         }
 
         .char-count.warning {
-            color: #f59e0b;
+            color: #fbbf24;
+            border-color: rgba(251, 191, 36, 0.3);
+            background: rgba(251, 191, 36, 0.1);
         }
 
         .char-count.danger {
-            color: #ef4444;
+            color: #f87171;
+            border-color: rgba(248, 113, 113, 0.3);
+            background: rgba(248, 113, 113, 0.1);
         }
 
         .preview-image {
@@ -166,7 +176,7 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
     <!-- Header -->
     <header class="bg-black/30 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4">
@@ -304,13 +314,13 @@
 
                     <!-- Character Counts -->
                     <div class="flex flex-wrap gap-4 mt-4">
-                        <div id="charCountX" class="char-count text-sm text-gray-400">
+                        <div id="charCountX" class="char-count text-sm">
                             <i class="fab fa-x-twitter mr-1"></i>X: <span>0</span>/280
                         </div>
-                        <div id="charCountBluesky" class="char-count text-sm text-gray-400">
+                        <div id="charCountBluesky" class="char-count text-sm">
                             <i class="fas fa-cloud mr-1"></i>Bluesky: <span>0</span>/300
                         </div>
-                        <div id="charCountYoutube" class="char-count text-sm text-gray-400">
+                        <div id="charCountYoutube" class="char-count text-sm">
                             <i class="fab fa-youtube mr-1"></i>YouTube: <span>0</span>/2200
                         </div>
                     </div>
@@ -349,7 +359,12 @@
                         <!-- X Preview -->
                         <div id="previewX" class="bg-black rounded-xl p-4 border border-gray-700">
                             <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 bg-gray-700 rounded-full flex-shrink-0"></div>
+                                <div class="w-10 h-10 bg-gray-700 rounded-full flex-shrink-0 overflow-hidden">
+                                    <img id="previewXAvatar" src="" alt="" class="w-full h-full object-cover hidden">
+                                    <div id="previewXAvatarPlaceholder" class="w-full h-full flex items-center justify-center">
+                                        <i class="fab fa-x-twitter text-gray-500"></i>
+                                    </div>
+                                </div>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2">
                                         <span id="previewXName" class="font-bold text-white">Your Name</span>
@@ -366,7 +381,12 @@
                         <!-- Bluesky Preview -->
                         <div id="previewBluesky" class="bg-gradient-to-br from-blue-900/50 to-blue-800/30 rounded-xl p-4 border border-blue-700/50" style="display:none;">
                             <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 bg-blue-500 rounded-full flex-shrink-0"></div>
+                                <div class="w-10 h-10 bg-blue-500 rounded-full flex-shrink-0 overflow-hidden">
+                                    <img id="previewBlueskyAvatar" src="" alt="" class="w-full h-full object-cover hidden">
+                                    <div id="previewBlueskyAvatarPlaceholder" class="w-full h-full flex items-center justify-center">
+                                        <i class="fas fa-cloud text-blue-200"></i>
+                                    </div>
+                                </div>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2">
                                         <span id="previewBlueskyName" class="font-bold text-white">Your Name</span>
@@ -381,7 +401,12 @@
                         <!-- YouTube Preview -->
                         <div id="previewYoutube" class="bg-gradient-to-br from-red-900/50 to-red-800/30 rounded-xl p-4 border border-red-700/50 hidden">
                             <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 bg-red-600 rounded-full flex-shrink-0"></div>
+                                <div class="w-10 h-10 bg-red-600 rounded-full flex-shrink-0 overflow-hidden">
+                                    <img id="previewYoutubeAvatar" src="" alt="" class="w-full h-full object-cover hidden">
+                                    <div id="previewYoutubeAvatarPlaceholder" class="w-full h-full flex items-center justify-center">
+                                        <i class="fab fa-youtube text-red-200"></i>
+                                    </div>
+                                </div>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2">
                                         <span id="previewYoutubeName" class="font-bold text-white">Your Channel</span>
@@ -543,55 +568,49 @@
                 </button>
             </div>
             <div class="p-6 space-y-4">
-                <!-- Posting Methods -->
-                <div class="bg-gradient-to-r from-gray-800/50 to-gray-900/50 rounded-xl p-4 border border-gray-700">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-                            <i class="fas fa-route text-white text-sm"></i>
-                        </div>
-                        <span class="font-medium text-white">Posting Methods</span>
-                    </div>
-                    <div class="space-y-2 text-sm text-gray-300">
-                        <div class="flex items-center justify-between">
-                            <span><i class="fab fa-x-twitter text-gray-400 mr-2"></i>X / Twitter</span>
-                            <span class="text-xs bg-gray-700/60 px-2 py-1 rounded-full">Intent Link</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span><i class="fab fa-youtube text-red-500 mr-2"></i>YouTube</span>
-                            <span class="text-xs bg-gray-700/60 px-2 py-1 rounded-full">Studio Paste</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span><i class="fas fa-cloud text-blue-400 mr-2"></i>Bluesky</span>
-                            <span class="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded-full">API (FOSS)</span>
-                        </div>
-                    </div>
-                    <label class="mt-4 flex items-center gap-2 text-xs text-gray-300">
-                        <input type="checkbox" id="openComposersInternal" class="rounded border-gray-600 bg-gray-800">
-                        Open X/YouTube composers inside the app
-                    </label>
-                    <label class="mt-2 flex items-center gap-2 text-xs text-gray-300">
-                        <input type="checkbox" id="forceExternalYoutube" class="rounded border-gray-600 bg-gray-800" checked>
-                        Force YouTube to open in external browser
-                    </label>
-                </div>
-
+                <!-- Platform Logins -->
                 <div class="bg-gradient-to-r from-gray-800/40 to-gray-900/40 rounded-xl p-4 border border-gray-700">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
                             <i class="fas fa-right-to-bracket text-white text-sm"></i>
                         </div>
-                        <span class="font-medium text-white">Logins</span>
+                        <span class="font-medium text-white">Platform Authentication</span>
                     </div>
+
+                    <!-- How it works explanation -->
+                    <div class="bg-gray-800/50 rounded-lg p-3 mb-4 border border-gray-700/50">
+                        <p class="text-xs text-gray-300 mb-2">
+                            <i class="fas fa-info-circle text-blue-400 mr-1"></i>
+                            <span class="font-medium text-white">How Login Works:</span>
+                        </p>
+                        <ul class="text-xs text-gray-400 space-y-1.5 ml-5 list-disc">
+                            <li><span class="text-white font-medium">X/Twitter:</span> Opens popup composer, log in normally. Auto-detects when logged in.</li>
+                            <li><span class="text-white font-medium">YouTube:</span> Opens popup composer, log in then <span class="text-yellow-300 font-medium">navigate to any channel page</span> (click your profile icon → "Your channel") to confirm login.</li>
+                            <li><span class="text-white font-medium">Bluesky:</span> Uses app password for API access (see below).</li>
+                        </ul>
+                    </div>
+
+                    <!-- Login Buttons -->
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="openLogin('x')" class="w-full bg-gray-800/70 hover:bg-gray-800 text-white py-2 rounded-lg transition text-sm">
-                            <i class="fab fa-x-twitter mr-2 text-gray-300"></i>Open X Login
+                            <i class="fab fa-x-twitter mr-2 text-gray-300"></i>Login to X
                         </button>
                         <button onclick="openLogin('youtube')" class="w-full bg-gray-800/70 hover:bg-gray-800 text-white py-2 rounded-lg transition text-sm">
-                            <i class="fab fa-youtube mr-2 text-red-500"></i>Open YouTube Login
+                            <i class="fab fa-youtube mr-2 text-red-500"></i>Login to YouTube
                         </button>
                     </div>
+
+                    <!-- Login Status Indicators -->
+                    <div class="mt-3 space-y-2 text-xs">
+                        <div id="xLoginStatus" class="flex items-center gap-2">
+                            <span class="text-gray-400"><i class="fas fa-circle mr-1"></i>X: Not logged in</span>
+                        </div>
+                        <div id="ytLoginStatus" class="flex items-center gap-2">
+                            <span class="text-gray-400"><i class="fas fa-circle mr-1"></i>YouTube: Not logged in</span>
+                        </div>
+                    </div>
                     <p class="text-xs text-gray-400 mt-3">
-                        Log in once; sessions persist in the docked composer.
+                        <i class="fas fa-shield-halved text-green-400 mr-1"></i>Sessions persist in isolated browser profiles - you only need to log in once.
                     </p>
                 </div>
 
@@ -609,9 +628,44 @@
                             <input type="text" id="bskyHandle" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" placeholder="yourname.bsky.social">
                         </div>
                         <div>
-                            <label class="text-xs text-gray-400 block mb-1">App Password</label>
-                            <input type="password" id="bskyPassword" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" placeholder="Enter App Password">
+                            <label class="text-xs text-gray-400 block mb-1">App Password <span class="text-blue-400">(Required)</span></label>
+                            <input type="password" id="bskyPassword" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" placeholder="xxxx-xxxx-xxxx-xxxx">
                         </div>
+
+                        <!-- App Password Instructions -->
+                        <div class="bg-blue-900/20 rounded-lg p-3 border border-blue-700/30">
+                            <div class="flex items-start gap-2 mb-2">
+                                <i class="fas fa-info-circle text-blue-400 mt-0.5"></i>
+                                <div class="flex-1">
+                                    <p class="text-xs text-blue-200 font-medium mb-1">What's an App Password?</p>
+                                    <p class="text-xs text-gray-300">Bluesky requires app passwords for third-party apps (not your main password). This keeps your account secure!</p>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-300 space-y-1 ml-6">
+                                <p><span class="text-blue-300">1.</span> Click the button below to open Bluesky settings</p>
+                                <p><span class="text-blue-300">2.</span> Click "Add App Password"</p>
+                                <p><span class="text-blue-300">3.</span> Give it a name (e.g., "Chaos Foundry Publisher")</p>
+                                <p><span class="text-blue-300">4.</span> <span class="text-yellow-300 font-medium">⚠ The password is shown ONCE!</span> Copy it EXACTLY <span class="font-semibold">including all dashes</span> (xxxx-xxxx-xxxx-xxxx), then paste above</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-2">
+                            <button onclick="openBlueskyAppPasswordSettings()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-lg transition text-xs font-medium">
+                                <i class="fas fa-external-link-alt mr-1"></i>Open App Password Settings
+                            </button>
+                            <button onclick="testBlueskyConnection()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 rounded-lg transition text-xs font-medium">
+                                <i class="fas fa-vial mr-1"></i>Test Connection
+                            </button>
+                        </div>
+
+                        <!-- Delete Credentials Button -->
+                        <button onclick="deleteSavedCredentials()" class="w-full bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 text-red-300 py-2 px-3 rounded-lg transition text-xs font-medium">
+                            <i class="fas fa-trash mr-1"></i>Delete Saved Encrypted Credentials
+                        </button>
+
+                        <!-- Connection Status -->
+                        <div id="bskyConnectionStatus" class="hidden"></div>
                     </div>
                 </div>
 
@@ -626,7 +680,7 @@
                     <div class="space-y-3">
                         <div>
                             <label class="text-xs text-gray-400 block mb-1">Channel Handle</label>
-                            <input type="text" id="ytChannelId" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-red-500" placeholder="ChaosFoundry">
+                            <input type="text" id="ytChannelId" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-red-500" placeholder="Auto-fills on login">
                         </div>
                         <p class="text-xs text-gray-400">
                             Enter your handle (without @). Opens your community tab for posting.
@@ -634,17 +688,23 @@
                     </div>
                 </div>
 
-                <!-- Legacy X/Twitter Note -->
+                <!-- X/Twitter Settings -->
                 <div class="bg-gradient-to-r from-gray-800/30 to-gray-900/30 rounded-xl p-4 border border-gray-700/60">
-                    <div class="flex items-center gap-3 mb-2">
+                    <div class="flex items-center gap-3 mb-3">
                         <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center">
                             <i class="fab fa-x-twitter text-white text-sm"></i>
                         </div>
                         <span class="font-medium text-white">X / Twitter</span>
                     </div>
-                    <p class="text-xs text-gray-400">
-                        Uses the official intent composer to avoid paid API costs.
-                    </p>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Username (auto-populated on login)</label>
+                            <input type="text" id="xHandle" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gray-500" placeholder="username" readonly>
+                        </div>
+                        <p class="text-xs text-gray-400">
+                            Uses the official intent composer to avoid paid API costs. Username is detected automatically when you log in.
+                        </p>
+                    </div>
                 </div>
 
                 <!-- X/Twitter Settings (removed paid API fields) -->
@@ -657,6 +717,69 @@
                 <button onclick="saveApiSettings()" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition">
                     Save Settings
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Confirmation Modal -->
+    <div id="postConfirmModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 rounded-2xl w-full max-w-2xl border border-white/10 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-white">✓ Post Published Successfully</h3>
+                <button onclick="closePostConfirmation()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-6">
+                <!-- Post Preview -->
+                <div class="bg-gray-800/50 rounded-xl p-4 border border-white/10">
+                    <h4 class="text-white font-semibold mb-2">Your Post</h4>
+                    <p id="confirmPostContent" class="text-gray-300 whitespace-pre-wrap"></p>
+                    <div id="confirmPostImage" class="hidden mt-3"></div>
+                </div>
+
+                <!-- Publishing Results -->
+                <div class="space-y-3">
+                    <h4 class="text-white font-semibold">Publishing Results</h4>
+                    <div id="confirmPlatformResults" class="space-y-2">
+                        <!-- Platform results will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Stats Display (Future: real API stats) -->
+                <div class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-xl p-4 border border-blue-700/30">
+                    <h4 class="text-white font-semibold mb-3 flex items-center gap-2">
+                        <i class="fas fa-chart-line text-blue-400"></i>
+                        Post Reach
+                    </h4>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div id="confirmReach" class="text-2xl font-bold text-white">-</div>
+                            <div class="text-xs text-gray-400">Potential Reach</div>
+                        </div>
+                        <div class="text-center">
+                            <div id="confirmPlatforms" class="text-2xl font-bold text-white">0</div>
+                            <div class="text-xs text-gray-400">Platforms</div>
+                        </div>
+                        <div class="text-center">
+                            <div id="confirmTimestamp" class="text-sm font-medium text-white">Just now</div>
+                            <div class="text-xs text-gray-400">Published</div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3 italic">
+                        <i class="fas fa-info-circle mr-1"></i>Real-time engagement stats coming soon! Check platform sites for live metrics.
+                    </p>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="flex gap-3">
+                    <button onclick="copyPostContent()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-lg transition">
+                        <i class="fas fa-copy mr-2"></i>Copy Content
+                    </button>
+                    <button onclick="closePostConfirmation()" class="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-3 px-4 rounded-lg transition">
+                        <i class="fas fa-check mr-2"></i>Done
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -928,6 +1051,9 @@
             if (postHistory.length > 50) postHistory.pop();
             localStorage.setItem('unifiedPublisherHistory', JSON.stringify(postHistory));
 
+            // Show post confirmation modal
+            showPostConfirmation(postRecord);
+
             // Reset UI
             document.getElementById('postContent').value = '';
             removeImage();
@@ -938,6 +1064,72 @@
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Publish Transmission</span>';
         }
+
+        // Show post confirmation modal
+        function showPostConfirmation(postRecord) {
+            // Populate content
+            document.getElementById('confirmPostContent').textContent = postRecord.content;
+
+            // Show image if present
+            const confirmImageEl = document.getElementById('confirmPostImage');
+            if (postRecord.image) {
+                confirmImageEl.innerHTML = `<img src="${postRecord.image}" class="max-h-48 rounded-lg" alt="Post image">`;
+                confirmImageEl.classList.remove('hidden');
+            } else {
+                confirmImageEl.classList.add('hidden');
+            }
+
+            // Show platform results
+            const resultsContainer = document.getElementById('confirmPlatformResults');
+            resultsContainer.innerHTML = postRecord.results.map(r => {
+                let statusHtml = '';
+                let statusClass = '';
+
+                if (r.skipped) {
+                    statusClass = 'bg-gray-700/50 border-gray-600';
+                    statusHtml = '<i class="fas fa-minus-circle text-gray-400 mr-2"></i>Skipped (API not available)';
+                } else if (r.success) {
+                    statusClass = 'bg-green-900/30 border-green-700/50';
+                    statusHtml = '<i class="fas fa-check-circle text-green-400 mr-2"></i>Published successfully';
+                } else {
+                    statusClass = 'bg-red-900/30 border-red-700/50';
+                    statusHtml = '<i class="fas fa-exclamation-circle text-red-400 mr-2"></i>Failed';
+                }
+
+                const platformName = API_CAPABILITIES[r.platform]?.label || r.platform.toUpperCase();
+
+                return `
+                    <div class="${statusClass} rounded-lg p-3 border flex items-center justify-between">
+                        <span class="text-white font-medium">${platformName}</span>
+                        <span class="text-sm text-gray-300">${statusHtml}</span>
+                    </div>
+                `;
+            }).join('');
+
+            // Update stats
+            const successfulPlatforms = postRecord.results.filter(r => r.success || r.skipped).length;
+            document.getElementById('confirmPlatforms').textContent = successfulPlatforms;
+
+            // Format timestamp
+            const postTime = new Date(postRecord.timestamp);
+            document.getElementById('confirmTimestamp').textContent = postTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            // Show modal
+            document.getElementById('postConfirmModal').classList.remove('hidden');
+        }
+
+        // Close post confirmation modal
+        function closePostConfirmation() {
+            document.getElementById('postConfirmModal').classList.add('hidden');
+        }
+
+        // Close modal on outside click
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('postConfirmModal');
+            if (e.target === modal) {
+                closePostConfirmation();
+            }
+        });
 
         // Render history
         function renderHistory() {
@@ -1440,6 +1632,18 @@
         // Settings modal
         function openSettings() {
             document.getElementById('settingsModal').classList.remove('hidden');
+
+            // Refresh login status indicators when modal opens
+            if (apiSettings.x?.handle) {
+                updateLoginIndicator('x', true, apiSettings.x.handle);
+            } else {
+                updateLoginIndicator('x', false, '');
+            }
+            if (apiSettings.youtube?.channelId) {
+                updateLoginIndicator('youtube', true, apiSettings.youtube.channelId);
+            } else {
+                updateLoginIndicator('youtube', false, '');
+            }
         }
 
         function closeSettings() {
@@ -1452,24 +1656,80 @@
 
         // Save API settings
         function saveApiSettings() {
+            // Preserve existing avatar data when saving
+            const existingBlueskyAvatar = apiSettings.bluesky?.avatar;
+            const existingXAvatar = apiSettings.x?.avatar;
+            const existingYoutubeAvatar = apiSettings.youtube?.avatar;
+
+            // Get checkbox values if elements exist
+            const internalCheckbox = document.getElementById('openComposersInternal');
+            const externalYoutubeCheckbox = document.getElementById('forceExternalYoutube');
+
             apiSettings = {
                 bluesky: {
                     handle: document.getElementById('bskyHandle').value,
-                    password: document.getElementById('bskyPassword').value
+                    password: document.getElementById('bskyPassword').value,
+                    avatar: existingBlueskyAvatar
                 },
                 youtube: {
-                    channelId: document.getElementById('ytChannelId').value
+                    channelId: document.getElementById('ytChannelId').value,
+                    avatar: existingYoutubeAvatar
+                },
+                x: {
+                    handle: apiSettings.x?.handle,
+                    avatar: existingXAvatar
                 },
                 preferences: {
-                    openComposersInternal: document.getElementById('openComposersInternal').checked,
-                    forceExternalYoutube: document.getElementById('forceExternalYoutube').checked
+                    openComposersInternal: internalCheckbox ? internalCheckbox.checked : true,
+                    forceExternalYoutube: externalYoutubeCheckbox ? externalYoutubeCheckbox.checked : false
                 }
             };
 
             localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
             updatePreviewIdentity();
-            closeSettings();
-            showToast('API settings saved!', 'success');
+
+            // Show success feedback
+            showToast('✓ Settings saved successfully!', 'success');
+
+            // Close modal after a short delay so user sees the toast
+            setTimeout(() => {
+                closeSettings();
+            }, 500);
+        }
+
+        // Load encrypted credentials on startup
+        async function loadEncryptedCredentials() {
+            try {
+                if (pyBridge && pyBridge.hasSavedCredentials) {
+                    const hasCreds = await pyBridge.hasSavedCredentials();
+                    if (hasCreds && pyBridge.loadSavedCredentials) {
+                        const credsJson = await pyBridge.loadSavedCredentials();
+                        if (credsJson) {
+                            const creds = JSON.parse(credsJson);
+                            console.log('[Credentials] ✓ Loaded encrypted credentials for:', creds.handle);
+
+                            // Populate settings
+                            if (!apiSettings.bluesky) {
+                                apiSettings.bluesky = {};
+                            }
+                            apiSettings.bluesky.handle = creds.handle;
+                            apiSettings.bluesky.password = creds.password;
+
+                            // Save to localStorage for session
+                            localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+
+                            // Update UI
+                            document.getElementById('bskyHandle').value = creds.handle;
+                            document.getElementById('bskyPassword').value = creds.password;
+                            updateBlueskyLoginStatus(creds.handle, '');
+
+                            showToast('🔐 Bluesky credentials loaded from secure storage', 'success');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('[Credentials] Failed to load encrypted credentials:', error);
+            }
         }
 
         // Load API settings
@@ -1477,11 +1737,23 @@
             if (apiSettings.bluesky?.handle) document.getElementById('bskyHandle').value = apiSettings.bluesky.handle;
             if (apiSettings.bluesky?.password) document.getElementById('bskyPassword').value = apiSettings.bluesky.password;
             if (apiSettings.youtube?.channelId) document.getElementById('ytChannelId').value = apiSettings.youtube.channelId;
-            const internalPreference = apiSettings.preferences?.openComposersInternal;
-            document.getElementById('openComposersInternal').checked = internalPreference !== false;
-            const forceExternalPreference = apiSettings.preferences?.forceExternalYoutube;
-            document.getElementById('forceExternalYoutube').checked = forceExternalPreference !== false;
+
+            // Load checkbox preferences only if elements exist (removed from UI)
+            const internalCheckbox = document.getElementById('openComposersInternal');
+            const externalYoutubeCheckbox = document.getElementById('forceExternalYoutube');
+            if (internalCheckbox) {
+                const internalPreference = apiSettings.preferences?.openComposersInternal;
+                internalCheckbox.checked = internalPreference !== false;
+            }
+            if (externalYoutubeCheckbox) {
+                const forceExternalPreference = apiSettings.preferences?.forceExternalYoutube;
+                externalYoutubeCheckbox.checked = forceExternalPreference !== false;
+            }
+
             updatePreviewIdentity();
+
+            // Load encrypted credentials after localStorage settings
+            loadEncryptedCredentials();
         }
 
         // Close modal on outside click
@@ -1493,30 +1765,57 @@
         updateStats();
 
         function updatePreviewIdentity() {
+            // Update X preview
             const xHandle = (apiSettings.x?.handle || '').trim();
             if (xHandle) {
                 const cleanX = xHandle.startsWith('@') ? xHandle.slice(1) : xHandle;
                 document.getElementById('previewXName').textContent = cleanX || 'Your Name';
                 document.getElementById('previewXHandle').textContent = `@${cleanX}`;
+
+                if (apiSettings.x?.avatar) {
+                    const avatarImg = document.getElementById('previewXAvatar');
+                    const placeholder = document.getElementById('previewXAvatarPlaceholder');
+                    avatarImg.src = apiSettings.x.avatar;
+                    avatarImg.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                }
             } else {
                 document.getElementById('previewXName').textContent = 'Your Name';
                 document.getElementById('previewXHandle').textContent = '@handle';
             }
 
+            // Update Bluesky preview
             const bskyHandle = (apiSettings.bluesky?.handle || '').trim();
             if (bskyHandle) {
                 const cleanBsky = bskyHandle.startsWith('@') ? bskyHandle.slice(1) : bskyHandle;
                 const displayName = cleanBsky.split('.')[0] || cleanBsky;
                 document.getElementById('previewBlueskyName').textContent = displayName || 'Bluesky User';
                 document.getElementById('previewBlueskyHandle').textContent = `@${cleanBsky}`;
+
+                if (apiSettings.bluesky?.avatar) {
+                    const avatarImg = document.getElementById('previewBlueskyAvatar');
+                    const placeholder = document.getElementById('previewBlueskyAvatarPlaceholder');
+                    avatarImg.src = apiSettings.bluesky.avatar;
+                    avatarImg.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                }
             } else {
                 document.getElementById('previewBlueskyName').textContent = 'Your Name';
                 document.getElementById('previewBlueskyHandle').textContent = '@handle.bsky.social';
             }
 
+            // Update YouTube preview
             const ytChannelId = (apiSettings.youtube?.channelId || '').trim();
             document.getElementById('previewYoutubeName').textContent = ytChannelId ? 'Your Channel' : 'Your Channel';
             document.getElementById('previewYoutubeHandle').textContent = ytChannelId ? `@${ytChannelId}` : 'YouTube';
+
+            if (apiSettings.youtube?.avatar) {
+                const avatarImg = document.getElementById('previewYoutubeAvatar');
+                const placeholder = document.getElementById('previewYoutubeAvatarPlaceholder');
+                avatarImg.src = apiSettings.youtube.avatar;
+                avatarImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
         }
 
         function shouldUseInternalComposer(platform) {
@@ -1528,6 +1827,258 @@
             }
             return internalEnabled;
         }
+
+        // Bluesky helper functions
+        function openBlueskyAppPasswordSettings() {
+            const url = 'https://bsky.app/settings/app-passwords';
+            if (pyBridge && pyBridge.openInternalUrl) {
+                pyBridge.openInternalUrl(url);
+            } else {
+                window.open(url, '_blank', 'noopener');
+            }
+        }
+
+        async function deleteSavedCredentials() {
+            if (!confirm('Are you sure you want to delete your saved encrypted Bluesky credentials?')) {
+                return;
+            }
+
+            try {
+                if (pyBridge && pyBridge.deleteSavedCredentials) {
+                    const result = await pyBridge.deleteSavedCredentials();
+                    if (result) {
+                        // Clear from localStorage too
+                        if (apiSettings.bluesky) {
+                            delete apiSettings.bluesky.password;
+                        }
+                        localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+
+                        // Clear the password field
+                        document.getElementById('bskyPassword').value = '';
+
+                        showToast('✓ Encrypted credentials deleted', 'success');
+                    } else {
+                        showToast('Failed to delete credentials', 'error');
+                    }
+                } else {
+                    showToast('Delete function not available', 'error');
+                }
+            } catch (error) {
+                console.error('[Credentials] Delete failed:', error);
+                showToast('Error deleting credentials', 'error');
+            }
+        }
+
+        async function testBlueskyConnection() {
+            const handle = document.getElementById('bskyHandle').value.trim();
+            const password = document.getElementById('bskyPassword').value.trim();
+            const statusEl = document.getElementById('bskyConnectionStatus');
+
+            if (!handle || !password) {
+                statusEl.innerHTML = `
+                    <div class="bg-red-900/30 border border-red-700/50 rounded-lg p-2 flex items-center gap-2">
+                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                        <span class="text-xs text-red-300">Please enter both handle and app password</span>
+                    </div>
+                `;
+                statusEl.classList.remove('hidden');
+                return;
+            }
+
+            // Show loading state
+            statusEl.innerHTML = `
+                <div class="bg-blue-900/30 border border-blue-700/50 rounded-lg p-2 flex items-center gap-2">
+                    <i class="fas fa-spinner fa-spin text-blue-400"></i>
+                    <span class="text-xs text-blue-300">Testing connection...</span>
+                </div>
+            `;
+            statusEl.classList.remove('hidden');
+
+            try {
+                // Use the Python bridge to test Bluesky connection
+                if (pyBridge && pyBridge.testBlueskyConnection) {
+                    const result = await pyBridge.testBlueskyConnection(handle, password);
+                    if (result) {
+                        statusEl.innerHTML = `
+                            <div class="bg-green-900/30 border border-green-700/50 rounded-lg p-2 flex items-center gap-2">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span class="text-xs text-green-300">✓ Connection successful! Credentials saved.</span>
+                            </div>
+                        `;
+                        // Auto-save on successful test
+                        apiSettings.bluesky = { handle, password };
+                        localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+
+                        // Update preview with handle (no avatar from app password login)
+                        updateBlueskyLoginStatus(handle, '');
+                        showToast(`✓ Bluesky connected as ${handle}`, 'success');
+                    } else {
+                        throw new Error('Authentication failed');
+                    }
+                } else {
+                    // Fallback: just save without testing
+                    statusEl.innerHTML = `
+                        <div class="bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-2 flex items-center gap-2">
+                            <i class="fas fa-info-circle text-yellow-400"></i>
+                            <span class="text-xs text-yellow-300">Saved (test unavailable in this mode)</span>
+                        </div>
+                    `;
+                    apiSettings.bluesky = { handle, password };
+                    localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+
+                    // Update preview with handle
+                    updateBlueskyLoginStatus(handle, '');
+                    showToast(`✓ Bluesky credentials saved`, 'success');
+                }
+            } catch (error) {
+                statusEl.innerHTML = `
+                    <div class="bg-red-900/30 border border-red-700/50 rounded-lg p-2 flex items-center gap-2">
+                        <i class="fas fa-times-circle text-red-400"></i>
+                        <span class="text-xs text-red-300">Connection failed. Check your credentials.</span>
+                    </div>
+                `;
+            }
+
+            // Hide status after 5 seconds
+            setTimeout(() => {
+                statusEl.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Login status update functions (called from ComposerWindow)
+        function updateXLoginStatus(username, avatarUrl) {
+            console.log('[Login] X login detected:', username, 'Avatar:', avatarUrl);
+
+            // Auto-populate settings
+            apiSettings.x = apiSettings.x || {};
+            apiSettings.x.handle = username;
+            if (avatarUrl) apiSettings.x.avatar = avatarUrl;
+
+            // Update UI field
+            const handleInput = document.getElementById('xHandle');
+            if (handleInput) {
+                handleInput.value = username;
+            }
+
+            // Update preview names and avatar
+            document.getElementById('previewXName').textContent = username || 'Your Name';
+            document.getElementById('previewXHandle').textContent = `@${username}`;
+
+            if (avatarUrl) {
+                const avatarImg = document.getElementById('previewXAvatar');
+                const placeholder = document.getElementById('previewXAvatarPlaceholder');
+                avatarImg.src = avatarUrl;
+                avatarImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
+
+            // Show success indicator
+            updateLoginIndicator('x', true, username);
+
+            // Save settings
+            localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+            showToast(`✓ Logged in to X as @${username}`, 'success');
+        }
+
+        function updateYouTubeLoginStatus(handle, avatarUrl) {
+            console.log('[Login] YouTube login detected:', handle, 'Avatar:', avatarUrl);
+
+            // Auto-populate settings
+            apiSettings.youtube = apiSettings.youtube || {};
+            apiSettings.youtube.channelId = handle;
+            if (avatarUrl) apiSettings.youtube.avatar = avatarUrl;
+
+            // Update UI field
+            const channelInput = document.getElementById('ytChannelId');
+            if (channelInput) {
+                channelInput.value = handle;
+            }
+
+            // Update preview names and avatar
+            document.getElementById('previewYoutubeName').textContent = handle || 'Your Channel';
+            document.getElementById('previewYoutubeHandle').textContent = `@${handle}`;
+
+            if (avatarUrl) {
+                const avatarImg = document.getElementById('previewYoutubeAvatar');
+                const placeholder = document.getElementById('previewYoutubeAvatarPlaceholder');
+                avatarImg.src = avatarUrl;
+                avatarImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
+
+            // Show success indicator
+            updateLoginIndicator('youtube', true, handle);
+
+            // Save settings
+            localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+            showToast(`✓ Logged in to YouTube as @${handle}`, 'success');
+        }
+
+        function updateBlueskyLoginStatus(handle, avatarUrl) {
+            console.log('[Login] Bluesky login detected:', handle, 'Avatar:', avatarUrl);
+
+            // Auto-populate settings
+            apiSettings.bluesky = apiSettings.bluesky || {};
+            apiSettings.bluesky.handle = handle;
+            if (avatarUrl) apiSettings.bluesky.avatar = avatarUrl;
+
+            // Update UI field
+            const handleInput = document.getElementById('bskyHandle');
+            if (handleInput) {
+                handleInput.value = handle;
+            }
+
+            // Update preview names and avatar
+            const cleanBsky = handle.startsWith('@') ? handle.slice(1) : handle;
+            const displayName = cleanBsky.split('.')[0] || cleanBsky;
+            document.getElementById('previewBlueskyName').textContent = displayName || 'Bluesky User';
+            document.getElementById('previewBlueskyHandle').textContent = `@${cleanBsky}`;
+
+            if (avatarUrl) {
+                const avatarImg = document.getElementById('previewBlueskyAvatar');
+                const placeholder = document.getElementById('previewBlueskyAvatarPlaceholder');
+                avatarImg.src = avatarUrl;
+                avatarImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
+
+            // Save settings
+            localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+            showToast(`✓ Logged in to Bluesky as ${cleanBsky}`, 'success');
+        }
+
+        function updateLoginIndicator(platform, isLoggedIn, username) {
+            // Update login status indicators in the settings modal
+            const indicators = {
+                x: document.getElementById('xLoginStatus'),
+                youtube: document.getElementById('ytLoginStatus')
+            };
+
+            const platformNames = {
+                x: 'X',
+                youtube: 'YouTube'
+            };
+
+            const indicator = indicators[platform];
+            if (indicator) {
+                if (isLoggedIn && username) {
+                    indicator.innerHTML = `<span class="text-green-400"><i class="fas fa-check-circle mr-1"></i>Logged in as @${username}</span>`;
+                } else {
+                    indicator.innerHTML = `<span class="text-gray-400"><i class="fas fa-circle mr-1"></i>${platformNames[platform]}: Not logged in</span>`;
+                }
+            }
+        }
+
+        // Check login status on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if we have saved credentials/sessions
+            if (apiSettings.x?.handle) {
+                updateLoginIndicator('x', true, apiSettings.x.handle);
+            }
+            if (apiSettings.youtube?.channelId) {
+                updateLoginIndicator('youtube', true, apiSettings.youtube.channelId);
+            }
+        });
     </script>
 </body>
 </html>

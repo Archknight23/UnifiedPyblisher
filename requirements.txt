@@ -1,3 +1,5 @@
 PyQt6>=6.6.0
 PyQt6-WebEngine>=6.6.0
 atproto>=0.0.40
+packaging>=23.0
+cryptography>=41.0.0
