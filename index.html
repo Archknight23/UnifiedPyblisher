@@ -9,17 +9,26 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+        * {
+            font-family: 'Courier Prime', monospace;
+        }
 
         body {
-            font-family: 'Inter', sans-serif;
+            background: #000000;
+            color: #00ffff;
         }
 
         .platform-card {
             transition: all 0.3s ease;
+            border: 2px solid #00ffff !important;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
         }
 
         .platform-card:hover {
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            border-color: #ff00ff !important;
             transform: translateY(-2px);
         }
 
@@ -30,35 +39,38 @@
 
         .char-count {
             transition: all 0.2s ease;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.8);
             padding: 6px 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #e5e7eb;
+            border-radius: 0;
+            border: 1px solid #00ffff;
+            color: #00ffff;
             font-weight: 500;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
         }
 
         .char-count.warning {
-            color: #fbbf24;
-            border-color: rgba(251, 191, 36, 0.3);
-            background: rgba(251, 191, 36, 0.1);
+            color: #ffff00;
+            border-color: #ffff00;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+            background: rgba(255, 255, 0, 0.05);
         }
 
         .char-count.danger {
-            color: #f87171;
-            border-color: rgba(248, 113, 113, 0.3);
-            background: rgba(248, 113, 113, 0.1);
+            color: #ff00ff;
+            border-color: #ff00ff;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+            background: rgba(255, 0, 255, 0.05);
         }
 
         .preview-image {
             max-width: 100%;
-            border-radius: 8px;
+            border-radius: 0;
             margin-top: 8px;
         }
 
         .tab-active {
-            border-bottom: 2px solid #3b82f6;
-            color: #3b82f6;
+            border-bottom: 2px solid #00ffff;
+            color: #00ffff;
         }
 
         .status-dot {
@@ -84,7 +96,7 @@
         }
 
         .history-item:hover {
-            background-color: #f3f4f6;
+            background-color: rgba(0, 255, 255, 0.1);
         }
 
         /* Queue animations */
@@ -113,10 +125,10 @@
 
         @keyframes pulseGlow {
             0%, 100% {
-                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+                box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.7);
             }
             50% {
-                box-shadow: 0 0 20px 5px rgba(59, 130, 246, 0.3);
+                box-shadow: 0 0 20px 5px rgba(0, 255, 255, 0.3);
             }
         }
 
@@ -144,6 +156,7 @@
 
         .progress-bar-fill {
             transition: width 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            background: linear-gradient(90deg, #00ffff, #ff00ff) !important;
         }
 
         .celebrate {
@@ -168,35 +181,76 @@
 
         .queue-button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
         }
 
         .queue-button:active:not(:disabled) {
             transform: translateY(0);
         }
+
+        /* Neon aesthetic overrides */
+        .bg-black\/30 {
+            background: rgba(0, 0, 0, 0.7) !important;
+            border: 1px solid #00ffff !important;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2) !important;
+        }
+
+        .border-white\/10 {
+            border-color: #00ffff !important;
+        }
+
+        .text-white {
+            color: #00ffff !important;
+        }
+
+        .text-gray-400 {
+            color: #888888 !important;
+        }
+
+        .text-gray-500 {
+            color: #666666 !important;
+        }
+
+        .bg-gradient-to-br {
+            background: rgba(0, 0, 0, 0.8) !important;
+            border: 1px solid #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        .rounded-2xl {
+            border-radius: 0;
+        }
+
+        .rounded-xl {
+            border-radius: 0;
+        }
+
+        .rounded-lg {
+            border-radius: 0;
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+<body class="bg-black min-h-screen" style="background-color: #000000; color: #00ffff;">
     <!-- Header -->
     <header class="bg-black/30 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-share-alt text-white"></i>
+                    <div class="w-10 h-10 bg-black border border-cyan-400 flex items-center justify-center" style="box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">
+                        <i class="fas fa-share-alt" style="color: #00ffff;"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-white">Chaos Foundry Unified Publishing Service</h1>
-                        <p class="text-xs text-gray-400">Chaos Foundry Tech Division Research Project</p>
+                        <h1 class="text-xl font-bold" style="color: #00ffff; text-transform: uppercase; letter-spacing: 2px;">UNIFIED PUBLISHER</h1>
+                        <p class="text-xs" style="color: #888888;">◆ CHAOS FOUNDRY TECH DIVISION ◆</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="openSettings()" class="text-gray-400 hover:text-white transition">
+                    <button onclick="openSettings()" style="color: #00ffff;" class="hover:text-fuchsia-400 transition">
                         <i class="fas fa-cog text-xl"></i>
                     </button>
                     <div class="flex items-center gap-2 text-sm">
-                        <span id="connectionStatus" class="status-dot w-2 h-2 bg-green-500 rounded-full"></span>
-                        <span class="text-gray-400" id="status">Ready</span>
+                        <span id="connectionStatus" class="status-dot w-2 h-2 bg-cyan-400 rounded-full"></span>
+                        <span id="status" style="color: #888888;">Ready</span>
                     </div>
                 </div>
             </div>
@@ -209,11 +263,11 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- Platform Selection -->
                 <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
-                    <h2 class="text-white font-semibold mb-4 flex items-center gap-2">
-                        <i class="fas fa-globe text-blue-400"></i>
-                        Pick your Poison
+                    <h2 class="font-semibold mb-4 flex items-center gap-2" style="color: #00ffff; text-transform: uppercase;">
+                        <i class="fas fa-globe" style="color: #ff00ff;"></i>
+                        ▶ PICK YOUR POISON
                     </h2>
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                         <!-- X/Twitter -->
                         <label class="platform-card cursor-pointer bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl p-4 border border-white/5 hover:border-blue-500/50">
                             <input type="checkbox" id="platform-x" class="hidden platform-toggle" checked onchange="updateCharCounts()">
@@ -223,7 +277,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="text-white font-medium">X / Twitter</div>
-                                    <div class="text-xs text-gray-400">280 chars</div>
+                                    <div class="text-xs text-gray-400"><span id="xLimitLabel">280</span> chars</div>
                                 </div>
                                 <div class="check-indicator w-6 h-6 rounded-full border-2 border-gray-600 flex items-center justify-center">
                                     <i class="fas fa-check text-white text-xs hidden"></i>
@@ -270,9 +324,9 @@
                 <!-- Post Editor -->
                 <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-white font-semibold flex items-center gap-2">
-                            <i class="fas fa-pen text-green-400"></i>
-                            Compose your message
+                        <h2 class="font-semibold flex items-center gap-2" style="color: #00ffff; text-transform: uppercase;">
+                            <i class="fas fa-pen" style="color: #00ffff;"></i>
+                            ▶ COMPOSE MESSAGE
                         </h2>
                         <div class="flex items-center gap-2 text-sm">
                             <button onclick="insertTag('bold')" class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition" title="Bold">
@@ -315,7 +369,7 @@
                     <!-- Character Counts -->
                     <div class="flex flex-wrap gap-4 mt-4">
                         <div id="charCountX" class="char-count text-sm">
-                            <i class="fab fa-x-twitter mr-1"></i>X: <span>0</span>/280
+                            <i class="fab fa-x-twitter mr-1"></i>X: <span>0</span>/<span id="xLimitCount">280</span>
                         </div>
                         <div id="charCountBluesky" class="char-count text-sm">
                             <i class="fas fa-cloud mr-1"></i>Bluesky: <span>0</span>/300
@@ -341,19 +395,20 @@
                         <button
                             onclick="publishPost()"
                             id="publishBtn"
-                            class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-xl flex items-center gap-2 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            class="font-semibold py-3 px-8 rounded-xl flex items-center gap-2 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            style="background: linear-gradient(90deg, #00ffff, #ff00ff); color: #000; border: 2px solid #00ffff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);"
                         >
                             <i class="fas fa-paper-plane"></i>
-                            <span>Publish Transmission</span>
+                            <span>PUBLISH TRANSMISSION</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Preview Section -->
                 <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
-                    <h2 class="text-white font-semibold mb-4 flex items-center gap-2">
-                        <i class="fas fa-eye text-yellow-400"></i>
-                        Live Preview
+                    <h2 class="font-semibold mb-4 flex items-center gap-2" style="color: #00ffff; text-transform: uppercase;">
+                        <i class="fas fa-eye" style="color: #ff00ff;"></i>
+                        ▶ LIVE PREVIEW
                     </h2>
                     <div id="previewContainer" class="space-y-4">
                         <!-- X Preview -->
@@ -430,9 +485,9 @@
             <div class="space-y-6">
                 <!-- Quick Actions -->
                 <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
-                    <h2 class="text-white font-semibold mb-4 flex items-center gap-2">
-                        <i class="fas fa-bolt text-blue-400"></i>
-                        Quick Actions
+                    <h2 class="font-semibold mb-4 flex items-center gap-2" style="color: #00ffff; text-transform: uppercase;">
+                        <i class="fas fa-bolt" style="color: #ff00ff;"></i>
+                        ▶ QUICK ACTIONS
                     </h2>
                     <div class="space-y-3 text-sm">
                         <button onclick="openComposer('x')" class="w-full bg-gray-800/50 hover:bg-gray-800 text-white py-2 rounded-lg transition flex items-center justify-between">
@@ -452,14 +507,14 @@
                 <div id="queuePanel" class="hidden queue-panel bg-black/30 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
                     <!-- Progress Bar -->
                     <div class="h-1 bg-gray-800">
-                        <div id="queueProgressBar" class="progress-bar-fill h-full bg-gradient-to-r from-blue-500 to-purple-600" style="width: 0%"></div>
+                        <div id="queueProgressBar" class="progress-bar-fill h-full bg-gradient-to-r from-cyan-500 to-fuchsia-600" style="width: 0%"></div>
                     </div>
 
                     <div class="p-6">
-                        <h3 class="text-white font-semibold mb-4 flex items-center gap-2">
-                            <i class="fas fa-tasks text-blue-400"></i>
-                            Publishing Queue
-                            <span id="queueCount" class="text-xs text-gray-400 ml-auto">0/0</span>
+                        <h3 class="font-semibold mb-4 flex items-center gap-2" style="color: #00ffff; text-transform: uppercase;">
+                            <i class="fas fa-tasks" style="color: #ff00ff;"></i>
+                            ▶ PUBLISHING QUEUE
+                            <span id="queueCount" class="text-xs ml-auto" style="color: #888888;">0/0</span>
                         </h3>
 
                         <!-- Queue Items Container -->
@@ -469,13 +524,13 @@
 
                         <!-- Action Buttons -->
                         <div id="queueActions" class="space-y-2">
-                            <button id="queueActionBtn" onclick="handleQueueAction()" class="queue-button w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                            <button id="queueActionBtn" onclick="handleQueueAction()" class="queue-button w-full font-semibold py-3 px-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed" style="background: linear-gradient(90deg, #00ffff, #ff00ff); color: #000; border: 2px solid #00ffff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);">
                                 <i class="fas fa-rocket mr-2"></i>
-                                <span id="queueActionText">Start</span>
+                                <span id="queueActionText">START</span>
                             </button>
-                            <button id="queueDoneBtn" onclick="markCurrentDone()" class="queue-button hidden w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-xl">
+                            <button id="queueDoneBtn" onclick="markCurrentDone()" class="queue-button hidden w-full font-semibold py-2 px-4 rounded-xl" style="background: linear-gradient(90deg, #00ff00, #00ffff); color: #000; border: 2px solid #00ffff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);">
                                 <i class="fas fa-check mr-2"></i>
-                                Done - Next Platform
+                                DONE - NEXT PLATFORM
                             </button>
                         </div>
 
@@ -489,9 +544,9 @@
                 </div>
                 <!-- Quick Stats -->
                 <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
-                    <h2 class="text-white font-semibold mb-4 flex items-center gap-2">
-                        <i class="fas fa-chart-bar text-purple-400"></i>
-                        Today's Stats
+                    <h2 class="font-semibold mb-4 flex items-center gap-2" style="color: #00ffff; text-transform: uppercase;">
+                        <i class="fas fa-chart-bar" style="color: #ff00ff;"></i>
+                        ▶ TODAY'S STATS
                     </h2>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-gray-800/50 rounded-xl p-4 text-center">
@@ -516,11 +571,11 @@
                 <!-- Post History -->
                 <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-white font-semibold flex items-center gap-2">
-                            <i class="fas fa-history text-orange-400"></i>
-                            Recent Posts
+                        <h2 class="font-semibold flex items-center gap-2" style="color: #00ffff; text-transform: uppercase;">
+                            <i class="fas fa-history" style="color: #ff00ff;"></i>
+                            ▶ RECENT POSTS
                         </h2>
-                        <button onclick="clearHistory()" class="text-xs text-gray-400 hover:text-white transition">Clear</button>
+                        <button onclick="clearHistory()" class="text-xs hover:text-fuchsia-400 transition" style="color: #888888;">Clear</button>
                     </div>
                     <div id="historyContainer" class="space-y-3 max-h-96 overflow-y-auto">
                         <div class="text-center text-gray-500 py-8">
@@ -532,9 +587,9 @@
 
                 <!-- API Documentation -->
                 <div class="bg-black/30 backdrop-blur-md rounded-2xl p-6 border border-white/10">
-                    <h2 class="text-white font-semibold mb-4 flex items-center gap-2">
-                        <i class="fas fa-book text-green-400"></i>
-                        API Setup
+                    <h2 class="font-semibold mb-4 flex items-center gap-2" style="color: #00ffff; text-transform: uppercase;">
+                        <i class="fas fa-book" style="color: #ff00ff;"></i>
+                        ▶ API SETUP
                     </h2>
                     <div class="space-y-3 text-sm">
                         <div class="flex items-center gap-2 text-gray-300">
@@ -701,8 +756,41 @@
                             <label class="text-xs text-gray-400 block mb-1">Username (auto-populated on login)</label>
                             <input type="text" id="xHandle" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gray-500" placeholder="username" readonly>
                         </div>
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Character limit</label>
+                            <select id="xCharLimitMode" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gray-500" onchange="handleXCharLimitModeChange()">
+                                <option value="standard">Standard (280)</option>
+                                <option value="premium">X Premium (25000)</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                            <input type="number" id="xCharLimitCustom" class="mt-2 hidden w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gray-500" min="1" max="100000" placeholder="Enter custom limit">
+                        </div>
                         <p class="text-xs text-gray-400">
                             Uses the official intent composer to avoid paid API costs. Username is detected automatically when you log in.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Rendering Settings -->
+                <div class="bg-gradient-to-r from-slate-800/30 to-slate-900/30 rounded-xl p-4 border border-slate-700/60">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
+                            <i class="fas fa-display text-white text-sm"></i>
+                        </div>
+                        <span class="font-medium text-white">Renderer</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">QtWebEngine backend</label>
+                            <select id="rendererMode" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-slate-500">
+                                <option value="auto">Auto (system default)</option>
+                                <option value="vulkan">Vulkan</option>
+                                <option value="angle">ANGLE (GL)</option>
+                                <option value="swiftshader">SwiftShader (software)</option>
+                            </select>
+                        </div>
+                        <p class="text-xs text-gray-400">
+                            Renderer changes apply on next launch.
                         </p>
                     </div>
                 </div>
@@ -752,7 +840,7 @@
                         <i class="fas fa-chart-line text-blue-400"></i>
                         Post Reach
                     </h4>
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="text-center">
                             <div id="confirmReach" class="text-2xl font-bold text-white">-</div>
                             <div class="text-xs text-gray-400">Potential Reach</div>
@@ -772,7 +860,7 @@
                 </div>
 
                 <!-- Quick Actions -->
-                <div class="flex gap-3">
+                <div class="flex flex-col sm:flex-row gap-3">
                     <button onclick="copyPostContent()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-lg transition">
                         <i class="fas fa-copy mr-2"></i>Copy Content
                     </button>
@@ -797,13 +885,19 @@
             x: { enabled: false, label: 'X/Twitter' },
             youtube: { enabled: false, label: 'YouTube' }
         };
+        const PLATFORM_LIMITS = { bluesky: 300, youtube: 2200 };
+        const X_LIMITS = { standard: 280, premium: 25000 };
         let pyBridge = null;
 
         // Queue System State
         let publishQueue = [];
         let currentQueueIndex = -1;
-        let queueContent = '';
+        let queueContentByPlatform = {};
         let queueImage = null;
+        let queueStarted = false;
+        let pendingApiPayload = null;
+        let pendingApiPlatforms = [];
+        let apiPostingInProgress = false;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -830,7 +924,13 @@
                     pyBridge.operationFinished.connect(function (platform, success, message) {
                         showToast(`${platform}: ${message}`, success ? 'success' : 'error');
                         document.getElementById('status').textContent = `${platform}: ${message}`;
+                        handlePlatformAutoComplete(platform, success);
                     });
+                }
+
+                if (pyBridge) {
+                    loadPlatformProfilesFromBridge();
+                    syncRendererModeFromBridge();
                 }
             });
         }
@@ -861,34 +961,98 @@
             });
         }
 
+        function getXCharLimit() {
+            const xSettings = apiSettings.x || {};
+            const mode = xSettings.limitMode || 'standard';
+            if (mode === 'custom') {
+                const customLimit = Number(xSettings.customLimit);
+                if (Number.isFinite(customLimit) && customLimit > 0) {
+                    return Math.floor(customLimit);
+                }
+            }
+            if (mode === 'premium') return X_LIMITS.premium;
+            return X_LIMITS.standard;
+        }
+
+        function getPlatformLimit(platform) {
+            if (platform === 'x') return getXCharLimit();
+            return PLATFORM_LIMITS[platform] || null;
+        }
+
+        function getWarningThreshold(platform, limit) {
+            if (!limit) return 0;
+            if (platform === 'youtube') return Math.max(0, limit - 200);
+            return Math.max(0, limit - 20);
+        }
+
+        function getPlatformContent(platform, content) {
+            if (!content) return '';
+            const limit = getPlatformLimit(platform);
+            if (!limit) return content;
+            if (content.length <= limit) return content;
+            return content.slice(0, limit);
+        }
+
+        function refreshXLimitUI() {
+            const limit = getXCharLimit();
+            const labelEl = document.getElementById('xLimitLabel');
+            if (labelEl) labelEl.textContent = limit;
+            const countEl = document.getElementById('xLimitCount');
+            if (countEl) countEl.textContent = limit;
+        }
+
+        function buildPlatformContentMap(content, platforms) {
+            const map = {};
+            const overLimit = [];
+            platforms.forEach(platform => {
+                const limit = getPlatformLimit(platform);
+                const trimmed = getPlatformContent(platform, content);
+                map[platform] = trimmed;
+                if (limit && content.length > limit) {
+                    overLimit.push({ platform, limit });
+                }
+            });
+            return { map, overLimit };
+        }
+
         // Update character counts
         function updateCharCounts() {
             const content = document.getElementById('postContent').value;
             const len = content.length;
+            refreshXLimitUI();
 
             // X/Twitter
             const xCount = document.querySelector('#charCountX span');
             const xEl = document.getElementById('charCountX');
+            const xLimit = getPlatformLimit('x');
+            const xWarn = getWarningThreshold('x', xLimit);
             xCount.textContent = len;
             xEl.className = 'char-count text-sm';
-            if (len > 260) xEl.classList.add('warning');
-            if (len > 280) xEl.classList.add('danger');
+            if (len > xWarn) xEl.classList.add('warning');
+            if (xLimit && len > xLimit) xEl.classList.add('danger');
+            xEl.title = xLimit && len > xLimit ? `Will post first ${xLimit} characters on X` : '';
 
             // Bluesky
             const bskyCount = document.querySelector('#charCountBluesky span');
             const bskyEl = document.getElementById('charCountBluesky');
+            const bskyLimit = getPlatformLimit('bluesky');
+            const bskyWarn = getWarningThreshold('bluesky', bskyLimit);
             bskyCount.textContent = len;
             bskyEl.className = 'char-count text-sm';
-            if (len > 280) bskyEl.classList.add('warning');
-            if (len > 300) bskyEl.classList.add('danger');
+            if (len > bskyWarn) bskyEl.classList.add('warning');
+            if (bskyLimit && len > bskyLimit) bskyEl.classList.add('danger');
+            bskyEl.title = bskyLimit && len > bskyLimit ? `Will post first ${bskyLimit} characters on Bluesky` : '';
 
             // YouTube
             const ytCount = document.querySelector('#charCountYoutube span');
             const ytEl = document.getElementById('charCountYoutube');
+            const ytLimit = getPlatformLimit('youtube');
+            const ytWarn = getWarningThreshold('youtube', ytLimit);
             ytCount.textContent = len;
             ytEl.className = 'char-count text-sm';
-            if (len > 2000) ytEl.classList.add('warning');
-            if (len > 2200) ytEl.classList.add('danger');
+            if (len > ytWarn) ytEl.classList.add('warning');
+            if (ytLimit && len > ytLimit) ytEl.classList.add('danger');
+            ytEl.title = ytLimit && len > ytLimit ? `Will post first ${ytLimit} characters on YouTube` : '';
 
             // Update previews
             updatePreviews();
@@ -992,6 +1156,10 @@
                 return;
             }
 
+            pendingApiPayload = null;
+            pendingApiPlatforms = [];
+            apiPostingInProgress = false;
+
             const platforms = [];
             if (document.getElementById('platform-x').checked) platforms.push('x');
             if (document.getElementById('platform-bluesky').checked) platforms.push('bluesky');
@@ -1002,47 +1170,48 @@
                 return;
             }
 
-            // Validate character limits
-            const limits = { x: 280, bluesky: 300, youtube: 2200 };
-            for (const platform of platforms) {
-                if (content.length > limits[platform]) {
-                    showToast(`Content exceeds ${platform} character limit`, 'error');
-                    return;
-                }
-            }
+            const { map: platformContents, overLimit } = buildPlatformContentMap(content, platforms);
+            overLimit.forEach(({ platform, limit }) => {
+                const label = getPlatformLabel(platform);
+                showToast(`${label} limit is ${limit} chars. Posting first ${limit}.`, 'warning');
+            });
 
             const supportedPlatforms = platforms.filter(platform => API_CAPABILITIES[platform]?.enabled);
+            const manualPlatforms = platforms.filter(platform => !API_CAPABILITIES[platform]?.enabled);
+            const orderedPlatforms = [...manualPlatforms, ...supportedPlatforms];
 
             // Disable button
             const btn = document.getElementById('publishBtn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing...';
 
-            // Handle API platforms (Bluesky)
+            // Handle API platforms (Bluesky) after manual queue completes
             if (supportedPlatforms.length > 0 && pyBridge && pyBridge.handlePublishRequest) {
-                const payload = {
+                pendingApiPayload = {
                     content: content,
                     platforms: supportedPlatforms,
                     image: currentImage,
-                    credentials: apiSettings
+                    credentials: apiSettings,
+                    content_by_platform: platformContents
                 };
-                pyBridge.handlePublishRequest(JSON.stringify(payload));
+                pendingApiPlatforms = supportedPlatforms.slice();
             }
 
             // Initialize queue for all platforms
-            initializeQueue(platforms, content, currentImage);
+            initializeQueue(orderedPlatforms, platformContents, currentImage, content);
 
             // Add to history
             const postRecord = {
                 id: Date.now(),
                 content,
                 image: currentImage,
-                platforms,
+                platforms: orderedPlatforms,
                 results: platforms.map(platform => ({
                     platform,
                     success: API_CAPABILITIES[platform]?.enabled && !!pyBridge,
+                    manual: API_CAPABILITIES[platform] ? !API_CAPABILITIES[platform]?.enabled : false,
                     id: Date.now() + Math.random(),
-                    skipped: !API_CAPABILITIES[platform]?.enabled
+                    skipped: !API_CAPABILITIES[platform]
                 })),
                 timestamp: new Date().toISOString()
             };
@@ -1085,9 +1254,12 @@
                 let statusHtml = '';
                 let statusClass = '';
 
-                if (r.skipped) {
+                if (r.manual) {
+                    statusClass = 'bg-yellow-900/30 border-yellow-700/50';
+                    statusHtml = '<i class="fas fa-hand-paper text-yellow-400 mr-2"></i>Manual post opened';
+                } else if (r.skipped) {
                     statusClass = 'bg-gray-700/50 border-gray-600';
-                    statusHtml = '<i class="fas fa-minus-circle text-gray-400 mr-2"></i>Skipped (API not available)';
+                    statusHtml = '<i class="fas fa-minus-circle text-gray-400 mr-2"></i>Skipped (unsupported platform)';
                 } else if (r.success) {
                     statusClass = 'bg-green-900/30 border-green-700/50';
                     statusHtml = '<i class="fas fa-check-circle text-green-400 mr-2"></i>Published successfully';
@@ -1107,7 +1279,7 @@
             }).join('');
 
             // Update stats
-            const successfulPlatforms = postRecord.results.filter(r => r.success || r.skipped).length;
+            const successfulPlatforms = postRecord.results.filter(r => r.success || r.manual).length;
             document.getElementById('confirmPlatforms').textContent = successfulPlatforms;
 
             // Format timestamp
@@ -1158,6 +1330,9 @@
                 }).join(' ');
 
                 const results = post.results.map(r => {
+                    if (r.manual) {
+                        return '<i class="fas fa-hand-paper text-yellow-400"></i>';
+                    }
                     if (r.skipped) {
                         return '<i class="fas fa-minus-circle text-gray-400"></i>';
                     }
@@ -1211,8 +1386,8 @@
                             <div class="text-sm text-gray-400 mb-2">Platforms & Status:</div>
                             <div class="flex flex-wrap gap-2">
                                 ${post.results.map(r => `
-                                    <span class="px-3 py-1 rounded-full text-sm ${r.skipped ? 'bg-gray-500/20 text-gray-300' : r.success ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
-                                        ${r.platform.toUpperCase()} - ${r.skipped ? 'Skipped' : r.success ? 'Success' : 'Failed'}
+                                    <span class="px-3 py-1 rounded-full text-sm ${r.manual ? 'bg-yellow-500/20 text-yellow-300' : r.skipped ? 'bg-gray-500/20 text-gray-300' : r.success ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                                        ${r.platform.toUpperCase()} - ${r.manual ? 'Manual' : r.skipped ? 'Skipped' : r.success ? 'Success' : 'Failed'}
                                     </span>
                                 `).join('')}
                             </div>
@@ -1276,18 +1451,30 @@
         }
 
         // Queue System Functions
-        function initializeQueue(platforms, content, image) {
-            publishQueue = platforms.map(platform => ({
-                platform,
-                status: 'pending', // 'pending', 'active', 'completed'
-                label: getPlatformLabel(platform),
-                icon: getPlatformIcon(platform),
-                color: getPlatformColor(platform),
-                isApi: API_CAPABILITIES[platform]?.enabled
-            }));
+        function initializeQueue(platforms, contentByPlatform, image, originalContent) {
+            const originalLength = typeof originalContent === 'string' ? originalContent.length : 0;
+            queueContentByPlatform = contentByPlatform || {};
+            publishQueue = platforms.map(platform => {
+                const limit = getPlatformLimit(platform);
+                const platformContent = queueContentByPlatform[platform] || '';
+                const wasTrimmed = limit ? originalLength > limit : false;
+                return {
+                    platform,
+                    status: 'pending', // 'pending', 'active', 'completed'
+                    label: getPlatformLabel(platform),
+                    icon: getPlatformIcon(platform),
+                    color: getPlatformColor(platform),
+                    isApi: API_CAPABILITIES[platform]?.enabled,
+                    content: platformContent,
+                    limit,
+                    wasTrimmed,
+                    apiSuccess: null
+                };
+            });
             currentQueueIndex = -1;
-            queueContent = content;
+            queueStarted = false;
             queueImage = image;
+            apiPostingInProgress = false;
             renderQueue();
             showQueuePanel();
 
@@ -1350,13 +1537,14 @@
                     itemClass += ' completed';
                 } else if (item.status === 'active') {
                     statusIcon = '<i class="fas fa-arrow-right text-blue-400 text-xl"></i>';
-                    statusText = 'Ready';
+                    statusText = item.isApi ? 'Posting' : 'Ready';
                     itemClass += ' active';
                 } else {
                     statusIcon = '<i class="fas fa-clock text-gray-600 text-xl"></i>';
                     statusText = 'Waiting';
                 }
 
+                const trimNote = item.wasTrimmed && item.limit ? ` • Trimmed to ${item.limit}` : '';
                 return `
                     <div class="${itemClass} bg-gray-800/50 rounded-xl p-4 border border-${item.color}-700/30">
                         <div class="flex items-center gap-3">
@@ -1366,7 +1554,7 @@
                             <div class="flex-1 min-w-0">
                                 <div class="text-white font-medium">${item.label}</div>
                                 <div class="text-xs text-gray-400">
-                                    ${statusText} • ${item.isApi ? 'API' : 'Manual'}
+                                    ${statusText} • ${item.isApi ? 'API' : 'Manual'}${trimNote}
                                 </div>
                             </div>
                             ${statusIcon}
@@ -1378,6 +1566,10 @@
 
         function handleQueueAction() {
             console.log('[Queue] handleQueueAction called, currentQueueIndex:', currentQueueIndex);
+            if (apiPostingInProgress) {
+                console.log('[Queue] API posting in progress; ignoring manual action');
+                return;
+            }
             if (currentQueueIndex === -1) {
                 // Start the queue
                 console.log('[Queue] Starting queue from button click');
@@ -1390,24 +1582,20 @@
         }
 
         function startQueue() {
+            if (queueStarted) {
+                console.log('[Queue] startQueue called but queue already started');
+                return;
+            }
+            queueStarted = true;
             console.log('[Queue] Starting queue with', publishQueue.length, 'platforms');
 
-            // Auto-complete API platforms first
-            publishQueue.forEach((item, index) => {
-                if (item.isApi) {
-                    console.log('[Queue] Auto-completing API platform:', item.platform);
-                    item.status = 'completed';
-                }
-            });
-
-            // Find first non-API platform
+            // Find first manual platform
             currentQueueIndex = publishQueue.findIndex(item => !item.isApi);
             console.log('[Queue] First manual platform index:', currentQueueIndex);
 
             if (currentQueueIndex === -1) {
-                // All platforms are API-based, we're done
-                console.log('[Queue] All platforms are API-based, completing immediately');
-                completeQueue();
+                console.log('[Queue] No manual platforms; starting API posts');
+                startApiPosting();
             } else {
                 publishQueue[currentQueueIndex].status = 'active';
                 console.log('[Queue] Activated platform:', publishQueue[currentQueueIndex].platform);
@@ -1418,6 +1606,7 @@
                 document.getElementById('queueActionText').textContent = `Open ${publishQueue[currentQueueIndex].label}`;
 
                 renderQueue();
+                processCurrentPlatform();
             }
         }
 
@@ -1429,16 +1618,20 @@
 
             const current = publishQueue[currentQueueIndex];
             console.log('[Queue] Processing platform:', current.platform);
+            const platformContent = current.content || '';
 
             if (current.platform === 'youtube') {
                 // Copy text to clipboard
-                copyTextToClipboard(queueContent);
+                copyTextToClipboard(platformContent);
                 showToast('✓ Text copied - paste in YouTube Studio', 'success');
+            } else if (current.wasTrimmed) {
+                copyTextToClipboard(platformContent);
+                showToast(`✓ Trimmed text copied for ${current.label}`, 'success');
             }
 
             // Open composer
-            console.log('[Queue] Opening composer for:', current.platform, 'with content:', queueContent);
-            openComposer(current.platform, queueContent);
+            console.log('[Queue] Opening composer for:', current.platform, 'with content:', platformContent);
+            openComposer(current.platform, platformContent);
 
             // Show "Done" button
             document.getElementById('queueActionBtn').classList.add('hidden');
@@ -1472,15 +1665,90 @@
                 console.log('[Queue] All platforms processed, completing queue');
                 completeQueue();
             } else {
-                // Activate next platform
-                console.log('[Queue] Activating next platform:', publishQueue[currentQueueIndex].platform);
-                publishQueue[currentQueueIndex].status = 'active';
+                if (publishQueue[currentQueueIndex].isApi) {
+                    console.log('[Queue] Manual done, starting API posts');
+                    startApiPosting();
+                } else {
+                    // Activate next platform
+                    console.log('[Queue] Activating next platform:', publishQueue[currentQueueIndex].platform);
+                    publishQueue[currentQueueIndex].status = 'active';
 
-                // Force button state for next platform
-                document.getElementById('queueActionBtn').classList.remove('hidden');
-                document.getElementById('queueDoneBtn').classList.add('hidden');
-                document.getElementById('queueActionText').textContent = `Open ${publishQueue[currentQueueIndex].label}`;
+                    // Force button state for next platform
+                    document.getElementById('queueActionBtn').classList.remove('hidden');
+                    document.getElementById('queueDoneBtn').classList.add('hidden');
+                    document.getElementById('queueActionText').textContent = `Open ${publishQueue[currentQueueIndex].label}`;
 
+                    renderQueue();
+                }
+            }
+        }
+
+        function startApiPosting() {
+            if (apiPostingInProgress) {
+                console.log('[Queue] API posting already in progress');
+                return;
+            }
+
+            if (!pendingApiPayload || pendingApiPlatforms.length === 0) {
+                console.log('[Queue] No pending API payload; completing queue');
+                completeQueue();
+                return;
+            }
+
+            apiPostingInProgress = true;
+            publishQueue.forEach(item => {
+                if (item.isApi && item.status !== 'completed') {
+                    item.status = 'active';
+                }
+            });
+
+            // Hide manual action buttons while API posts
+            document.getElementById('queueActionBtn').classList.add('hidden');
+            document.getElementById('queueDoneBtn').classList.add('hidden');
+
+            renderQueue();
+            if (pyBridge && pyBridge.handlePublishRequest) {
+                pyBridge.handlePublishRequest(JSON.stringify(pendingApiPayload));
+            } else {
+                console.warn('[Queue] API bridge unavailable, marking API items complete');
+                publishQueue.forEach(item => {
+                    if (item.isApi && item.status !== 'completed') {
+                        item.status = 'completed';
+                    }
+                });
+                apiPostingInProgress = false;
+                completeQueue();
+            }
+        }
+
+        function markApiPlatformResult(platform, success) {
+            const item = publishQueue.find(queueItem => queueItem.platform === platform);
+            if (!item) return;
+
+            item.status = 'completed';
+            item.apiSuccess = success;
+            renderQueue();
+
+            const remaining = publishQueue.filter(queueItem => queueItem.isApi && queueItem.status !== 'completed');
+            if (apiPostingInProgress && remaining.length === 0) {
+                apiPostingInProgress = false;
+                completeQueue();
+            }
+        }
+
+        function handlePlatformAutoComplete(platform, success) {
+            const item = publishQueue.find(queueItem => queueItem.platform === platform);
+            if (!item) return;
+
+            if (item.isApi) {
+                markApiPlatformResult(platform, success);
+                return;
+            }
+
+            if (item.status === 'active' && publishQueue[currentQueueIndex]?.platform === platform) {
+                markCurrentDone();
+            } else if (item.status !== 'completed') {
+                item.status = 'completed';
                 renderQueue();
             }
         }
@@ -1506,8 +1774,12 @@
         function resetQueue() {
             publishQueue = [];
             currentQueueIndex = -1;
-            queueContent = '';
+            queueContentByPlatform = {};
             queueImage = null;
+            queueStarted = false;
+            pendingApiPayload = null;
+            pendingApiPlatforms = [];
+            apiPostingInProgress = false;
             hideQueuePanel();
             document.getElementById('queueActions').classList.remove('hidden');
             document.getElementById('queueComplete').classList.add('hidden');
@@ -1528,7 +1800,16 @@
             actionText.textContent = `Open ${current.label}`;
         }
 
-        function copyTextToClipboard(text) {
+        async function copyTextToClipboard(text) {
+            if (pyBridge && pyBridge.setClipboardText) {
+                try {
+                    const ok = await pyBridge.setClipboardText(text);
+                    if (ok) return;
+                } catch (error) {
+                    console.warn('[Clipboard] Bridge copy failed:', error);
+                }
+            }
+
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).catch(() => {
                     fallbackCopyContent(text);
@@ -1538,20 +1819,14 @@
             }
         }
 
-        function copyPostContent() {
+        async function copyPostContent() {
             const content = document.getElementById('postContent').value;
             if (!content) {
                 showToast('Nothing to copy yet', 'warning');
                 return;
             }
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(content)
-                    .then(() => showToast('Copied to clipboard', 'success'))
-                    .catch(() => fallbackCopyContent(content));
-            } else {
-                fallbackCopyContent(content);
-            }
+            await copyTextToClipboard(content);
+            showToast('Copied to clipboard', 'success');
         }
 
         function fallbackCopyContent(content) {
@@ -1566,10 +1841,34 @@
             }
         }
 
+        function normalizeYoutubeHandle(handle) {
+            if (!handle) return '';
+            let cleaned = handle.trim();
+            if (!cleaned) return '';
+
+            const urlMatch = cleaned.match(/youtube\.com\/@([^/?#]+)/i);
+            if (urlMatch) return urlMatch[1];
+
+            const atMatch = cleaned.match(/@([^/?#]+)/);
+            if (atMatch) return atMatch[1];
+
+            cleaned = cleaned.replace(/^@+/, '');
+            cleaned = cleaned.replace(/^https?:\/\/(www\.)?youtube\.com\//i, '');
+            cleaned = cleaned.replace(/^(channel\/|c\/|user\/)/i, '');
+            cleaned = cleaned.split(/[/?#]/)[0];
+            return cleaned;
+        }
+
+        function isYoutubeChannelId(value) {
+            if (!value) return false;
+            return /^UC[a-zA-Z0-9_-]{20,}$/.test(value);
+        }
+
         function openComposer(platform, contentOverride = null) {
             console.log('[Composer] Opening composer for platform:', platform);
             const content = document.getElementById('postContent').value;
-            const textToUse = contentOverride !== null ? contentOverride : content;
+            const baseContent = contentOverride !== null ? contentOverride : content;
+            const textToUse = getPlatformContent(platform, baseContent);
             console.log('[Composer] Content to use:', textToUse);
 
             let url = '';
@@ -1581,10 +1880,14 @@
                     url = 'https://x.com/compose/post';
                 }
             } else if (platform === 'youtube') {
-                const channelHandle = apiSettings.youtube?.channelId;
-                url = channelHandle
-                    ? `https://www.youtube.com/@${channelHandle}/community`
-                    : 'https://www.youtube.com/';
+                const channelHandle = normalizeYoutubeHandle(apiSettings.youtube?.channelId || '');
+                if (channelHandle) {
+                    url = isYoutubeChannelId(channelHandle)
+                        ? `https://www.youtube.com/channel/${channelHandle}/community`
+                        : `https://www.youtube.com/@${channelHandle}/community`;
+                } else {
+                    url = 'https://www.youtube.com/';
+                }
             }
 
             console.log('[Composer] Generated URL:', url);
@@ -1599,7 +1902,11 @@
 
             if (useInternalComposer && pyBridge && pyBridge.openInternalUrl) {
                 console.log('[Composer] Opening in internal browser');
-                pyBridge.openInternalUrl(url);
+                if (platform === 'youtube' && pyBridge.openInternalUrlWithText) {
+                    pyBridge.openInternalUrlWithText(url, textToUse);
+                } else {
+                    pyBridge.openInternalUrl(url);
+                }
             } else if (pyBridge && pyBridge.openExternalUrl) {
                 console.log('[Composer] Opening in external browser');
                 pyBridge.openExternalUrl(url);
@@ -1655,11 +1962,21 @@
         }
 
         // Save API settings
-        function saveApiSettings() {
+        async function saveApiSettings() {
             // Preserve existing avatar data when saving
             const existingBlueskyAvatar = apiSettings.bluesky?.avatar;
             const existingXAvatar = apiSettings.x?.avatar;
             const existingYoutubeAvatar = apiSettings.youtube?.avatar;
+            const youtubeHandle = normalizeYoutubeHandle(document.getElementById('ytChannelId').value);
+            const xLimitModeEl = document.getElementById('xCharLimitMode');
+            const xLimitCustomEl = document.getElementById('xCharLimitCustom');
+            const xLimitMode = xLimitModeEl ? xLimitModeEl.value : (apiSettings.x?.limitMode || 'standard');
+            const xCustomLimitRaw = xLimitCustomEl ? xLimitCustomEl.value : '';
+            const xCustomLimit = Number.parseInt(xCustomLimitRaw, 10);
+            const xCustomLimitValue = Number.isFinite(xCustomLimit) && xCustomLimit > 0 ? xCustomLimit : null;
+            const rendererModeEl = document.getElementById('rendererMode');
+            const rendererMode = rendererModeEl ? rendererModeEl.value : (apiSettings.preferences?.rendererMode || 'auto');
+            const previousRendererMode = apiSettings.preferences?.rendererMode || 'auto';
 
             // Get checkbox values if elements exist
             const internalCheckbox = document.getElementById('openComposersInternal');
@@ -1672,29 +1989,58 @@
                     avatar: existingBlueskyAvatar
                 },
                 youtube: {
-                    channelId: document.getElementById('ytChannelId').value,
+                    channelId: youtubeHandle,
                     avatar: existingYoutubeAvatar
                 },
                 x: {
                     handle: apiSettings.x?.handle,
-                    avatar: existingXAvatar
+                    avatar: existingXAvatar,
+                    limitMode: xLimitMode,
+                    customLimit: xLimitMode === 'custom' ? xCustomLimitValue : null
                 },
                 preferences: {
                     openComposersInternal: internalCheckbox ? internalCheckbox.checked : true,
-                    forceExternalYoutube: externalYoutubeCheckbox ? externalYoutubeCheckbox.checked : false
+                    forceExternalYoutube: externalYoutubeCheckbox ? externalYoutubeCheckbox.checked : false,
+                    rendererMode: rendererMode
                 }
             };
 
             localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
             updatePreviewIdentity();
+            refreshXLimitUI();
+            updateCharCounts();
 
             // Show success feedback
             showToast('✓ Settings saved successfully!', 'success');
+            if (rendererMode !== previousRendererMode) {
+                showToast('Renderer mode updated. Restart app to apply.', 'info');
+            }
+
+            if (pyBridge && pyBridge.saveRendererMode) {
+                try {
+                    await pyBridge.saveRendererMode(rendererMode);
+                } catch (error) {
+                    console.error('[Renderer] Failed to save renderer mode:', error);
+                }
+            }
 
             // Close modal after a short delay so user sees the toast
             setTimeout(() => {
                 closeSettings();
             }, 500);
+        }
+
+        function handleXCharLimitModeChange() {
+            const modeEl = document.getElementById('xCharLimitMode');
+            const customEl = document.getElementById('xCharLimitCustom');
+            if (!modeEl || !customEl) return;
+
+            if (modeEl.value === 'custom') {
+                customEl.classList.remove('hidden');
+            } else {
+                customEl.classList.add('hidden');
+            }
+            updateCharCounts();
         }
 
         // Load encrypted credentials on startup
@@ -1737,6 +2083,14 @@
             if (apiSettings.bluesky?.handle) document.getElementById('bskyHandle').value = apiSettings.bluesky.handle;
             if (apiSettings.bluesky?.password) document.getElementById('bskyPassword').value = apiSettings.bluesky.password;
             if (apiSettings.youtube?.channelId) document.getElementById('ytChannelId').value = apiSettings.youtube.channelId;
+            const xLimitModeEl = document.getElementById('xCharLimitMode');
+            const xLimitCustomEl = document.getElementById('xCharLimitCustom');
+            if (xLimitModeEl) xLimitModeEl.value = apiSettings.x?.limitMode || 'standard';
+            if (xLimitCustomEl) xLimitCustomEl.value = apiSettings.x?.customLimit || '';
+            handleXCharLimitModeChange();
+            refreshXLimitUI();
+            const rendererModeEl = document.getElementById('rendererMode');
+            if (rendererModeEl) rendererModeEl.value = apiSettings.preferences?.rendererMode || 'auto';
 
             // Load checkbox preferences only if elements exist (removed from UI)
             const internalCheckbox = document.getElementById('openComposersInternal');
@@ -1754,6 +2108,60 @@
 
             // Load encrypted credentials after localStorage settings
             loadEncryptedCredentials();
+        }
+
+        async function syncRendererModeFromBridge() {
+            if (!pyBridge || !pyBridge.loadRendererMode) return;
+            try {
+                const backendMode = await pyBridge.loadRendererMode();
+                if (!backendMode) return;
+                const currentMode = apiSettings.preferences?.rendererMode;
+                if (!currentMode || currentMode === 'auto') {
+                    apiSettings.preferences = apiSettings.preferences || {};
+                    apiSettings.preferences.rendererMode = backendMode;
+                    localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+                    const rendererModeEl = document.getElementById('rendererMode');
+                    if (rendererModeEl) rendererModeEl.value = backendMode;
+                }
+            } catch (error) {
+                console.error('[Renderer] Failed to load renderer mode:', error);
+            }
+        }
+
+        async function loadPlatformProfilesFromBridge() {
+            if (!pyBridge || !pyBridge.loadPlatformProfiles) return;
+            try {
+                const profilesJson = await pyBridge.loadPlatformProfiles();
+                if (!profilesJson) return;
+                const profiles = JSON.parse(profilesJson);
+                let updated = false;
+
+                if (profiles.x && !apiSettings.x?.handle) {
+                    apiSettings.x = { ...(apiSettings.x || {}), ...profiles.x };
+                    updated = true;
+                }
+
+                if (profiles.youtube && !apiSettings.youtube?.channelId) {
+                    apiSettings.youtube = { ...(apiSettings.youtube || {}), ...profiles.youtube };
+                    updated = true;
+                }
+
+                if (updated) {
+                    localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+                    const handleInput = document.getElementById('xHandle');
+                    if (handleInput && apiSettings.x?.handle) handleInput.value = apiSettings.x.handle;
+                    const channelInput = document.getElementById('ytChannelId');
+                    if (channelInput && apiSettings.youtube?.channelId) channelInput.value = apiSettings.youtube.channelId;
+                    updatePreviewIdentity();
+                    if (apiSettings.x?.handle) updateLoginIndicator('x', true, apiSettings.x.handle);
+                    if (apiSettings.youtube?.channelId) updateLoginIndicator('youtube', true, apiSettings.youtube.channelId);
+                    refreshXLimitUI();
+                    handleXCharLimitModeChange();
+                    updateCharCounts();
+                }
+            } catch (error) {
+                console.error('[Profiles] Failed to load platform profiles:', error);
+            }
         }
 
         // Close modal on outside click
@@ -1946,19 +2354,46 @@
         }
 
         // Login status update functions (called from ComposerWindow)
-        function updateXLoginStatus(username, avatarUrl) {
-            console.log('[Login] X login detected:', username, 'Avatar:', avatarUrl);
+        function updateXLoginStatus(username, avatarUrl, isVerified = false) {
+            console.log('[Login] X login detected:', username, 'Avatar:', avatarUrl, 'Verified:', isVerified);
 
             // Auto-populate settings
             apiSettings.x = apiSettings.x || {};
             apiSettings.x.handle = username;
             if (avatarUrl) apiSettings.x.avatar = avatarUrl;
+            apiSettings.x.verified = isVerified;
+
+            // Auto-set character limit mode based on verification status
+            // BUT: Only override if user hasn't set a custom limit
+            const customLimitValue = Number(apiSettings.x.customLimit);
+            const hasCustomLimit = apiSettings.x.limitMode === 'custom' && Number.isFinite(customLimitValue) && customLimitValue > 0;
+            if (!hasCustomLimit) {
+                if (isVerified) {
+                    apiSettings.x.limitMode = 'premium';
+                    apiSettings.x.customLimit = null;
+                    console.log('[Login] X Premium detected - setting limit to 25000 characters');
+                } else {
+                    apiSettings.x.limitMode = 'standard';
+                    apiSettings.x.customLimit = null;
+                    console.log('[Login] Standard X account - setting limit to 280 characters');
+                }
+            } else {
+                console.log('[Login] Custom limit preserved:', apiSettings.x.customLimit);
+            }
 
             // Update UI field
             const handleInput = document.getElementById('xHandle');
             if (handleInput) {
                 handleInput.value = username;
             }
+
+            // Update character limit dropdown and display
+            const xLimitModeSelect = document.getElementById('xCharLimitMode');
+            if (xLimitModeSelect) {
+                xLimitModeSelect.value = apiSettings.x.limitMode;
+            }
+            handleXCharLimitModeChange();
+            updateCharCounts();
 
             // Update preview names and avatar
             document.getElementById('previewXName').textContent = username || 'Your Name';
@@ -1972,31 +2407,46 @@
                 placeholder.classList.add('hidden');
             }
 
-            // Show success indicator
-            updateLoginIndicator('x', true, username);
+            // Show success indicator with verification badge
+            const verificationBadge = isVerified ? ' ✓' : '';
+            updateLoginIndicator('x', true, username + verificationBadge);
 
             // Save settings
             localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
-            showToast(`✓ Logged in to X as @${username}`, 'success');
+            if (pyBridge && pyBridge.savePlatformProfile) {
+                const profilePayload = {
+                    handle: apiSettings.x.handle,
+                    avatar: apiSettings.x.avatar || '',
+                    verified: apiSettings.x.verified || false,
+                    limitMode: apiSettings.x.limitMode || 'standard',
+                    customLimit: apiSettings.x.customLimit || null
+                };
+                pyBridge.savePlatformProfile('x', JSON.stringify(profilePayload));
+            }
+            showToast(`✓ Logged in to X as @${username}${isVerified ? ' (Premium)' : ''}`, 'success');
         }
 
         function updateYouTubeLoginStatus(handle, avatarUrl) {
             console.log('[Login] YouTube login detected:', handle, 'Avatar:', avatarUrl);
+            const cleanHandle = normalizeYoutubeHandle(handle);
+            const isChannelId = isYoutubeChannelId(cleanHandle);
 
             // Auto-populate settings
             apiSettings.youtube = apiSettings.youtube || {};
-            apiSettings.youtube.channelId = handle;
+            apiSettings.youtube.channelId = cleanHandle;
             if (avatarUrl) apiSettings.youtube.avatar = avatarUrl;
 
             // Update UI field
             const channelInput = document.getElementById('ytChannelId');
             if (channelInput) {
-                channelInput.value = handle;
+                channelInput.value = cleanHandle;
             }
 
             // Update preview names and avatar
-            document.getElementById('previewYoutubeName').textContent = handle || 'Your Channel';
-            document.getElementById('previewYoutubeHandle').textContent = `@${handle}`;
+            document.getElementById('previewYoutubeName').textContent = cleanHandle || 'Your Channel';
+            document.getElementById('previewYoutubeHandle').textContent = cleanHandle
+                ? (isChannelId ? cleanHandle : `@${cleanHandle}`)
+                : 'YouTube';
 
             if (avatarUrl) {
                 const avatarImg = document.getElementById('previewYoutubeAvatar');
@@ -2007,11 +2457,18 @@
             }
 
             // Show success indicator
-            updateLoginIndicator('youtube', true, handle);
+            updateLoginIndicator('youtube', true, cleanHandle);
 
             // Save settings
             localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
-            showToast(`✓ Logged in to YouTube as @${handle}`, 'success');
+            if (pyBridge && pyBridge.savePlatformProfile) {
+                const profilePayload = {
+                    channelId: cleanHandle,
+                    avatar: apiSettings.youtube.avatar || ''
+                };
+                pyBridge.savePlatformProfile('youtube', JSON.stringify(profilePayload));
+            }
+            showToast(`✓ Logged in to YouTube as ${isChannelId ? cleanHandle : `@${cleanHandle}`}`, 'success');
         }
 
         function updateBlueskyLoginStatus(handle, avatarUrl) {
