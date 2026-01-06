@@ -182,41 +182,66 @@ class ComposerWindow(QMainWindow):
         self.browser.urlChanged.connect(self.check_login_status)
         self.browser.loadFinished.connect(self.on_load_finished)
 
-        # Create header with close button (ultra compact)
+        # Create glassmorphic header with close button
         header = QWidget()
-        header.setMaximumHeight(28)  # Force compact height
+        header.setMaximumHeight(48)
         header_layout = QHBoxLayout()
-        header_layout.setContentsMargins(8, 3, 8, 3)
-        header_layout.setSpacing(6)
+        header_layout.setContentsMargins(16, 8, 16, 8)
+        header_layout.setSpacing(12)
 
         header_title = QLabel(title)
-        header_title.setStyleSheet("color: #e5e7eb; font-weight: 500; font-size: 11px;")
+        header_title.setStyleSheet("""
+            color: #e0e0e0;
+            font-weight: 600;
+            font-size: 13px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        """)
         header_layout.addWidget(header_title)
         header_layout.addStretch(1)
 
-        self.status_label = QLabel("Waiting for login...")
-        self.status_label.setStyleSheet("color: #9ca3af; font-size: 10px;")
+        self.status_label = QLabel("⟳ Waiting for login...")
+        self.status_label.setStyleSheet("""
+            color: #9d4edd;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 4px 10px;
+            background: rgba(157, 78, 221, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(157, 78, 221, 0.3);
+        """)
         header_layout.addWidget(self.status_label)
 
         close_button = QPushButton("✕")
-        close_button.setFixedSize(22, 22)
+        close_button.setFixedSize(32, 32)
         close_button.clicked.connect(self.close)
         close_button.setStyleSheet("""
             QPushButton {
                 padding: 0px;
-                border-radius: 3px;
-                background: #1f2937;
-                color: #e5e7eb;
+                border-radius: 16px;
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #e0e0e0;
                 font-weight: bold;
-                font-size: 14px;
+                font-size: 16px;
             }
             QPushButton:hover {
-                background: #374151;
+                background: rgba(239, 71, 111, 0.2);
+                border-color: #ef476f;
+                color: #ef476f;
+            }
+            QPushButton:pressed {
+                background: rgba(239, 71, 111, 0.3);
             }
         """)
         header_layout.addWidget(close_button)
         header.setLayout(header_layout)
-        header.setStyleSheet("background: #111827; border-bottom: 1px solid #374151;")
+        header.setStyleSheet("""
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 rgba(255, 255, 255, 0.08),
+                stop:1 rgba(255, 255, 255, 0.05));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        """)
 
         # Container layout
         container = QWidget()
@@ -227,7 +252,7 @@ class ComposerWindow(QMainWindow):
         layout.addWidget(self.browser)
         container.setLayout(layout)
 
-        # Create loading overlay (compact and transparent)
+        # Create glassmorphic loading overlay
         self.loading_overlay = QWidget(container)
         loading_layout = QVBoxLayout()
         loading_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -235,8 +260,8 @@ class ComposerWindow(QMainWindow):
         # Spinner using Unicode character
         spinner_label = QLabel("⟳")
         spinner_label.setStyleSheet("""
-            color: #8b5cf6;
-            font-size: 32px;
+            color: #9d4edd;
+            font-size: 48px;
             font-weight: bold;
         """)
         spinner_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -244,10 +269,11 @@ class ComposerWindow(QMainWindow):
         # Loading text
         loading_text = QLabel("Connecting to Service...")
         loading_text.setStyleSheet("""
-            color: #d1d5db;
-            font-size: 11px;
-            margin-top: 8px;
+            color: #e0e0e0;
+            font-size: 13px;
+            margin-top: 16px;
             font-weight: 500;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         """)
         loading_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -255,7 +281,10 @@ class ComposerWindow(QMainWindow):
         loading_layout.addWidget(loading_text)
         self.loading_overlay.setLayout(loading_layout)
         self.loading_overlay.setStyleSheet("""
-            background: rgba(17, 24, 39, 0.75);
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 rgba(10, 10, 10, 0.85),
+                stop:1 rgba(26, 15, 31, 0.85));
+            backdrop-filter: blur(20px);
         """)
         self.loading_overlay.setGeometry(container.geometry())
         self.loading_overlay.raise_()
@@ -381,7 +410,15 @@ class ComposerWindow(QMainWindow):
         if logged_in and not self.login_detected:
             self.login_detected = True
             self.status_label.setText("✓ Logged in successfully!")
-            self.status_label.setStyleSheet("color: #10b981; font-size: 12px; font-weight: 600;")
+            self.status_label.setStyleSheet("""
+                color: #06d6a0;
+                font-size: 11px;
+                font-weight: 600;
+                padding: 4px 10px;
+                background: rgba(6, 214, 160, 0.15);
+                border-radius: 12px;
+                border: 1px solid rgba(6, 214, 160, 0.4);
+            """)
             print(f"[Composer] Login confirmed for {self.platform}")
 
             # Auto-close after 3 seconds (give more time for extraction)
