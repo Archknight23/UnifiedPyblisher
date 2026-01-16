@@ -75,13 +75,15 @@ if [ $? -ne 0 ]; then
     pip install -r requirements.txt --upgrade
 fi
 
-# Set Qt environment variables - conservative settings for cross-platform compatibility
-# Let Qt/Chromium automatically choose the best rendering backend
+# Set Qt environment variables for NVIDIA + Wayland compatibility
 export QT_QPA_PLATFORM=wayland
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=0
-# Enable basic hardware acceleration but let system decide the backend
-export QTWEBENGINE_CHROMIUM_FLAGS="--enable-gpu-rasterization"
+# Fix NVIDIA/Wayland rendering issues
+export QTWEBENGINE_CHROMIUM_FLAGS="--enable-gpu-rasterization --disable-gpu --enable-software-rasterization --disable-web-security --disable-features=VizDisplayCompositor"
+export EGL_PLATFORM=wayland
+export __GLX_VENDOR_LIBRARY_NAME=nvidia
 
 # Run the application
 echo "Launching Unified Publisher..."
+echo "Note: Running in software rendering mode to fix NVIDIA Wayland issues."
 python -m publisherlogic.main

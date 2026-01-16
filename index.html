@@ -2063,9 +2063,13 @@
             const platformContent = current.content || '';
 
             if (current.platform === 'youtube') {
-                // Copy text to clipboard
+                // Copy text to clipboard for YouTube
                 copyTextToClipboard(platformContent);
                 showToast('✓ Text copied - paste in YouTube Studio', 'success');
+            } else if (current.platform === 'x') {
+                // Also copy to clipboard as backup for X
+                copyTextToClipboard(platformContent);
+                showToast('✓ Opening X composer (text also copied to clipboard)', 'success');
             } else if (current.wasTrimmed) {
                 copyTextToClipboard(platformContent);
                 showToast(`✓ Trimmed text copied for ${current.label}`, 'success');
@@ -2122,6 +2126,50 @@
 
                     renderQueue();
                 }
+            }
+        }
+
+        // Called from Python when composer detects successful post
+        function handleComposerPostSuccess(platform) {
+            console.log('[Queue] Post success signal received for:', platform);
+
+            // Find the platform in queue and mark as completed
+            const platformIndex = publishQueue.findIndex(item => item.platform === platform);
+            if (platformIndex === -1) {
+                console.warn('[Queue] Platform not found in queue:', platform);
+                return;
+            }
+
+            // Mark as completed
+            publishQueue[platformIndex].status = 'completed';
+            console.log('[Queue] Marked', platform, 'as completed');
+
+            // Find next incomplete manual platform
+            const nextManualIndex = publishQueue.findIndex(item =>
+                !item.isApi && item.status !== 'completed'
+            );
+
+            if (nextManualIndex !== -1) {
+                // Auto-advance to next manual platform
+                console.log('[Queue] Auto-advancing to next platform:', publishQueue[nextManualIndex].platform);
+                currentQueueIndex = nextManualIndex;
+                publishQueue[nextManualIndex].status = 'active';
+
+                // Update button state
+                document.getElementById('queueActionBtn').classList.add('hidden');
+                document.getElementById('queueDoneBtn').classList.add('hidden');
+
+                renderQueue();
+
+                // Auto-open next composer after brief delay
+                setTimeout(() => {
+                    processCurrentPlatform();
+                }, 500);
+            } else {
+                // All manual platforms done, start API posting
+                console.log('[Queue] All manual platforms done, starting API posts');
+                renderQueue();
+                startApiPosting();
             }
         }
 
@@ -2315,6 +2363,7 @@
 
             let url = '';
             if (platform === 'x') {
+                // Try intent URL first - we clear corrupted storage before opening
                 if (textToUse) {
                     const encoded = encodeURIComponent(textToUse);
                     url = `https://x.com/intent/post?text=${encoded}`;
@@ -2322,12 +2371,16 @@
                     url = 'https://x.com/compose/post';
                 }
             } else if (platform === 'youtube') {
-                const channelHandle = normalizeYoutubeHandle(apiSettings.youtube?.channelId || '');
+                console.log('[Composer] YouTube apiSettings:', JSON.stringify(apiSettings.youtube));
+                const rawChannelId = apiSettings.youtube?.channelId || '';
+                const channelHandle = normalizeYoutubeHandle(rawChannelId);
+                console.log('[Composer] YouTube channelId raw:', rawChannelId, 'normalized:', channelHandle);
                 if (channelHandle) {
                     url = isYoutubeChannelId(channelHandle)
                         ? `https://www.youtube.com/channel/${channelHandle}/community`
                         : `https://www.youtube.com/@${channelHandle}/community`;
                 } else {
+                    console.warn('[Composer] ⚠ No YouTube channelId set! Opening base YouTube URL. Login to YouTube first to set your channel.');
                     url = 'https://www.youtube.com/';
                 }
             }
@@ -2342,13 +2395,20 @@
             console.log('[Composer] Use internal composer:', useInternalComposer);
             console.log('[Composer] pyBridge available:', !!pyBridge);
 
-            if (useInternalComposer && pyBridge && pyBridge.openInternalUrl) {
-                console.log('[Composer] Opening in internal browser');
-                if (platform === 'youtube' && pyBridge.openInternalUrlWithText) {
-                    pyBridge.openInternalUrlWithText(url, textToUse);
+            // Use docked composer for X and YouTube (centralized experience)
+            if (pyBridge && pyBridge.openDockedUrl) {
+                console.log('[Composer] Opening in docked composer');
+                if (platform === 'youtube' && pyBridge.openDockedUrlWithText) {
+                    pyBridge.openDockedUrlWithText(url, textToUse);
                 } else {
-                    pyBridge.openInternalUrl(url);
+                    pyBridge.openDockedUrl(url);
                 }
+            } else if (pyBridge && pyBridge.openDockedUrl) {
+                pyBridge.openDockedUrl(url);
+            } else if (pyBridge && pyBridge.openInternalUrl) {
+                pyBridge.openInternalUrl(url);
+            } else if (pyBridge && pyBridge.openInternalUrlWithText) {
+                pyBridge.openInternalUrlWithText(url, textToUse);
             } else if (pyBridge && pyBridge.openExternalUrl) {
                 console.log('[Composer] Opening in external browser');
                 pyBridge.openExternalUrl(url);
@@ -2368,8 +2428,10 @@
 
             if (!url) return;
 
-            const useInternalComposer = shouldUseInternalComposer(platform);
-            if (useInternalComposer && pyBridge && pyBridge.openInternalUrl) {
+            // Use docked composer for login too
+            if (pyBridge && pyBridge.openDockedUrl) {
+                pyBridge.openDockedUrl(url);
+            } else if (pyBridge && pyBridge.openInternalUrl) {
                 pyBridge.openInternalUrl(url);
             } else if (pyBridge && pyBridge.openExternalUrl) {
                 pyBridge.openExternalUrl(url);
@@ -2672,6 +2734,7 @@
             const preferences = apiSettings.preferences || {};
             const internalEnabled = preferences.openComposersInternal !== false;
             const forceExternalYoutube = preferences.forceExternalYoutube === true;
+
             if (platform === 'youtube' && forceExternalYoutube) {
                 return false;
             }
@@ -2978,6 +3041,63 @@
                 updateLoginIndicator('youtube', true, apiSettings.youtube.channelId);
             }
         });
+
+        // JavaScript Cleanup Function
+        function cleanupApplication() {
+            console.log('[Cleanup] Starting JavaScript cleanup...');
+            
+            try {
+                // Stop any ongoing API requests or timers
+                if (publishQueue.length > 0 || queueStarted) {
+                    console.log('[Cleanup] Stopping active queue operations...');
+                    queueStarted = false;
+                    publishQueue = [];
+                    currentQueueIndex = -1;
+                }
+                
+                // Save any unsaved data
+                if (postHistory && postHistory.length > 0) {
+                    localStorage.setItem('unifiedPublisherHistory', JSON.stringify(postHistory));
+                    console.log('[Cleanup] Saved post history');
+                }
+                
+                if (apiSettings && Object.keys(apiSettings).length > 0) {
+                    localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+                    console.log('[Cleanup] Saved API settings');
+                }
+                
+                // Clear any active toasts or notifications
+                const toastContainer = document.getElementById('toastContainer');
+                if (toastContainer) {
+                    toastContainer.innerHTML = '';
+                }
+                
+                // Reset any active animations or timeouts
+                const timeouts = [];
+                for (let i = 0; i < timeouts.length; i++) {
+                    clearTimeout(timeouts[i]);
+                }
+                
+                console.log('[Cleanup] ✅ JavaScript cleanup completed');
+                return true;
+            } catch (error) {
+                console.error('[Cleanup] ⚠ Error during JavaScript cleanup:', error);
+                return false;
+            }
+        }
+
+        // Auto-cleanup on page unload
+        window.addEventListener('beforeunload', function(event) {
+            console.log('[Cleanup] Page unloading, performing cleanup...');
+            cleanupApplication();
+        });
+
+        // Add cleanup method to bridge so Python can call it
+        function performJsCleanup() {
+            return cleanupApplication();
+        }
+
+        console.log('[Cleanup] JavaScript cleanup functions registered');
     </script>
 </body>
 </html>
