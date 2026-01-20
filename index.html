@@ -17,14 +17,17 @@
 
         /* Color Palette */
         :root {
-            --orange: #ff8c42;
-            --purple: #9d4edd;
-            --cyan: #06d6a0;
-            --red: #ef476f;
-            --dark: #0a0a0a;
-            --darker: #050505;
-            --glass-white: rgba(255, 255, 255, 0.1);
-            --glass-white-hover: rgba(255, 255, 255, 0.15);
+            --orange: #f59e0b;
+            --purple: #8b5cf6;
+            --cyan: #60a5fa;
+            --red: #f43f5e;
+            --dark: #0b0c10;
+            --darker: #050607;
+            --glass-white: rgba(255, 255, 255, 0.08);
+            --glass-white-hover: rgba(255, 255, 255, 0.12);
+            --fg: #e5e7eb;
+            --muted: #94a3b8;
+            --panel: rgba(255, 255, 255, 0.05);
         }
 
         /* Glassmorphism scrollbar */
@@ -52,17 +55,36 @@
 
         /* Animated gradient background */
         body {
-            background: linear-gradient(135deg,
-                #0a0a0a 0%,
-                #1a0f1f 25%,
-                #0f1a1a 50%,
-                #1a0a0a 75%,
-                #0a0a0a 100%
-            );
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-            color: #e0e0e0;
+            background-color: #0a0808;
+            background-image:
+                linear-gradient(135deg, rgba(157, 52, 52, 0.08), rgba(91, 31, 94, 0.08)),
+                linear-gradient(180deg, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65));
+            color: #e7e5e4;
             min-height: 100vh;
+        }
+
+        /* Subtle grid + noise overlay (no animation) */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 1px, transparent 1px, transparent 26px),
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 1px, transparent 1px, transparent 26px);
+            opacity: 0.35;
+            z-index: -1;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E");
+            mix-blend-mode: soft-light;
+            opacity: 0.18;
+            z-index: -1;
         }
 
         @keyframes gradientShift {
@@ -71,39 +93,26 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Glassmorphism Cards */
+        /* Gritty panels */
         .platform-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(255, 255, 255, 0.05) !important;
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.18) !important;
-            border-radius: 16px !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+            background: rgba(20, 14, 14, 0.75) !important;
+            border: 1px solid rgba(255, 255, 255, 0.07) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             position: relative;
             overflow: hidden;
         }
 
         .platform-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 140, 66, 0.15), transparent);
-            transition: left 0.6s;
-        }
-
-        .platform-card:hover::before {
-            left: 100%;
+            content: none;
         }
 
         .platform-card:hover {
-            background: rgba(255, 255, 255, 0.1) !important;
-            border-color: var(--orange) !important;
-            box-shadow: 0 8px 32px rgba(255, 140, 66, 0.4), 0 0 0 1px var(--orange);
-            transform: translateY(-4px) scale(1.02);
+            background: rgba(34, 19, 19, 0.9) !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
+            transform: translateY(-1px);
         }
 
         .platform-card.disabled {
@@ -151,17 +160,18 @@
         }
 
         .status-dot {
-            animation: softPulse 2s ease-in-out infinite;
+            animation: softPulse 1.6s ease-in-out infinite;
+            background-color: #f59e0b;
         }
 
         @keyframes softPulse {
             0%, 100% {
-                opacity: 1;
-                box-shadow: 0 0 8px currentColor, 0 0 12px currentColor;
+                opacity: 0.9;
+                box-shadow: 0 0 3px rgba(245, 158, 11, 0.7);
             }
             50% {
-                opacity: 0.6;
-                box-shadow: 0 0 4px currentColor, 0 0 6px currentColor;
+                opacity: 0.7;
+                box-shadow: 0 0 2px rgba(245, 158, 11, 0.5);
             }
         }
 
@@ -204,11 +214,10 @@
 
         /* Queue animations */
         .queue-panel {
-            animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            animation: slideInRight 0.32s ease;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         @keyframes slideInRight {
@@ -223,17 +232,16 @@
         }
 
         .queue-item {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
             padding: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .queue-item.active {
-            animation: glassPulse 2s ease-in-out infinite;
             border-color: var(--purple);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         @keyframes glassPulse {
@@ -298,8 +306,8 @@
         }
 
         .queue-button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 0 10px rgba(157, 52, 52, 0.35);
         }
 
         .queue-button:active:not(:disabled) {
@@ -308,11 +316,9 @@
 
         /* Glassmorphism overrides */
         .bg-black\/30 {
-            background: rgba(255, 255, 255, 0.08) !important;
-            backdrop-filter: blur(20px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-            border: 1px solid rgba(255, 255, 255, 0.18) !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37) !important;
+            background: rgba(18, 12, 12, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.07) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22) !important;
         }
 
         .border-white\/10 {
@@ -332,11 +338,9 @@
         }
 
         .bg-gradient-to-br {
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            background: rgba(28, 16, 16, 0.85) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
         }
 
         .rounded-2xl {
@@ -375,29 +379,15 @@
             transform: translateY(-2px);
         }
 
-        /* Enhanced button styling */
+        /* Enhanced button styling (scoped transitions) */
         button {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
             position: relative;
             overflow: hidden;
         }
 
         button::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        button:active::after {
-            width: 300px;
-            height: 300px;
+            content: none;
         }
 
         button:disabled {
@@ -407,20 +397,20 @@
 
         /* Softer header effects */
         h1, h2, h3 {
-            transition: all 0.3s ease;
+            transition: color 0.1s ease;
         }
 
         h1:hover, h2:hover, h3:hover {
-            text-shadow: 0 0 20px rgba(157, 78, 221, 0.5);
-            transform: translateX(2px);
+            text-shadow: none;
+            transform: none;
         }
 
         /* Improved glass card hover effects */
         .bg-black\/30:hover,
         .bg-gradient-to-br:hover {
-            background: rgba(255, 255, 255, 0.12) !important;
-            box-shadow: 0 8px 32px rgba(157, 78, 221, 0.2), 0 12px 48px rgba(0, 0, 0, 0.4) !important;
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.07) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22) !important;
+            transform: translateY(-1px);
         }
 
         /* Loading spinner */
@@ -430,7 +420,7 @@
         }
 
         .loading-spinner {
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
 
         /* Soft glassmorphic focus rings */
@@ -442,9 +432,12 @@
 
         /* Smooth color transitions */
         * {
-            transition-property: color, background-color, border-color, box-shadow;
-            transition-duration: 0.2s;
-            transition-timing-function: ease;
+            transition: none !important;
+        }
+
+        /* Fast accents on controls only */
+        button, .platform-card, .queue-item, .grid.grid-cols-2 > div, .char-count, input, select, textarea {
+            transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease, background-color 0.1s ease, color 0.1s ease;
         }
 
         /* Icon soft glow on hover */
@@ -470,21 +463,20 @@
 
         /* Glassmorphic checkbox styling */
         .check-indicator {
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
             background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
         }
 
         .platform-toggle:checked ~ div .check-indicator {
             background: linear-gradient(135deg, var(--cyan), var(--purple));
             border-color: var(--purple);
-            box-shadow: 0 0 20px rgba(157, 78, 221, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
-            transform: scale(1.15);
+            box-shadow: 0 0 8px rgba(157, 78, 221, 0.35);
+            transform: scale(1.05);
         }
 
         .platform-toggle:checked ~ div .check-indicator i {
             display: inline-block !important;
-            animation: checkPop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            animation: none;
         }
 
         @keyframes checkPop {
@@ -501,7 +493,7 @@
 
         /* Smooth link hover */
         a {
-            transition: all 0.3s ease;
+            transition: color 0.12s ease;
             position: relative;
             text-decoration: none;
         }
@@ -513,8 +505,8 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--cyan), var(--purple));
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(90deg, #9d3410, #5b1f5e);
+            transition: width 0.12s ease;
         }
 
         a:hover::after {
@@ -522,33 +514,19 @@
         }
 
         a:hover {
-            color: var(--purple);
+            color: #f59e0b;
         }
 
         /* Enhanced progress bar */
         .progress-bar-fill {
-            transition: width 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
-            background: linear-gradient(90deg, #00ffff, #ff00ff) !important;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            transition: width 0.18s ease;
+            background: linear-gradient(90deg, #9d3410, #5b1f5e) !important;
+            box-shadow: none;
         }
 
         /* Soft ambient light effect */
         body::before {
-            content: '';
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(157, 78, 221, 0.03) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: -1;
-            animation: ambientPulse 8s ease-in-out infinite;
-        }
-
-        @keyframes ambientPulse {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.1); }
+            content: none;
         }
 
         /* Soft header shimmer */
@@ -558,18 +536,7 @@
         }
 
         header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 200%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
-            animation: softShimmer 4s linear infinite;
-        }
-
-        @keyframes softShimmer {
-            to { left: 100%; }
+            content: none;
         }
 
         /* Better placeholder styling */
@@ -588,45 +555,19 @@
         /* Card entrance animation */
         .bg-black\/30,
         .bg-gradient-to-br {
-            animation: cardFadeIn 0.5s ease-out backwards;
+            animation: none;
         }
 
-        .bg-black\/30:nth-child(1) { animation-delay: 0.1s; }
-        .bg-black\/30:nth-child(2) { animation-delay: 0.2s; }
-        .bg-black\/30:nth-child(3) { animation-delay: 0.3s; }
-
-        @keyframes cardFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Soft glassmorphic publish button */
+        /* Publish button */
         #publishBtn {
-            background: linear-gradient(135deg, var(--cyan), var(--purple), var(--orange)) !important;
-            border: none !important;
-            box-shadow: 0 8px 24px rgba(157, 78, 221, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
-            animation: softButtonGlow 3s ease-in-out infinite;
-        }
-
-        @keyframes softButtonGlow {
-            0%, 100% {
-                box-shadow: 0 8px 24px rgba(157, 78, 221, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
-            }
-            50% {
-                box-shadow: 0 8px 32px rgba(157, 78, 221, 0.6), 0 8px 24px rgba(255, 140, 66, 0.3);
-            }
+            background: linear-gradient(135deg, #9d3410, #5b1f5e) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.24);
         }
 
         #publishBtn:hover {
-            animation: softButtonGlow 1.5s ease-in-out infinite;
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 12px 36px rgba(157, 78, 221, 0.6), 0 8px 24px rgba(255, 140, 66, 0.4);
+            transform: translateY(-1px) scale(1.01);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
         }
 
         #publishBtn:active {
@@ -635,33 +576,21 @@
 
         /* Enhanced modal entrance */
         .fixed.inset-0 > div {
-            animation: modalSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                transform: scale(0.8) translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1) translateY(0);
-                opacity: 1;
-            }
+            animation: none;
         }
 
         /* Glassmorphic stats card styling */
         .grid.grid-cols-2 > div {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
             cursor: default;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .grid.grid-cols-2 > div:hover {
-            transform: translateY(-4px) scale(1.02);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 24px rgba(157, 78, 221, 0.3), 0 0 0 1px var(--purple);
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2), 0 0 0 1px var(--purple);
             border-color: var(--purple);
         }
 
@@ -1097,18 +1026,18 @@
                         </button>
                     </div>
 
-                    <!-- Login Status Indicators -->
-                    <div class="mt-3 space-y-2 text-xs">
-                        <div id="xLoginStatus" class="flex items-center gap-2">
-                            <span class="text-gray-400"><i class="fas fa-circle mr-1"></i>X: Not logged in</span>
-                        </div>
-                        <div id="ytLoginStatus" class="flex items-center gap-2">
-                            <span class="text-gray-400"><i class="fas fa-circle mr-1"></i>YouTube: Not logged in</span>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-3">
-                        <i class="fas fa-shield-halved text-green-400 mr-1"></i>Sessions persist in isolated browser profiles - you only need to log in once.
-                    </p>
+                     <!-- Login Status Indicators -->
+                     <div class="mt-3 space-y-2 text-xs">
+                         <div id="xLoginStatus" class="flex items-center gap-2">
+                             <span class="text-gray-400"><i class="fas fa-globe mr-1"></i>X: Uses browser login</span>
+                         </div>
+                         <div id="ytLoginStatus" class="flex items-center gap-2">
+                             <span class="text-gray-400"><i class="fas fa-globe mr-1"></i>YouTube: Uses browser login</span>
+                         </div>
+                     </div>
+                     <p class="text-xs text-gray-400 mt-3">
+                         <i class="fas fa-external-link-alt text-blue-400 mr-1"></i>X & YouTube use your system browser. Stay logged in there.
+                     </p>
                 </div>
 
                 <!-- Bluesky Settings -->
@@ -1759,7 +1688,9 @@
                 return;
             }
 
-            container.innerHTML = postHistory.slice(0, 10).map(post => {
+            const recent = postHistory.slice(0, 5);
+
+            container.innerHTML = recent.map(post => {
                 const date = new Date(post.timestamp);
                 const timeStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 const platformIcons = post.platforms.map(p => {
@@ -1854,11 +1785,12 @@
         function updateStats() {
             const today = new Date().toDateString();
             const todayPosts = postHistory.filter(p => new Date(p.timestamp).toDateString() === today);
+            const platformsReached = new Set(postHistory.flatMap(p => p.platforms)).size;
 
             document.getElementById('postsToday').textContent = todayPosts.length;
-            document.getElementById('reactionsToday').textContent = Math.floor(Math.random() * 50);
-            document.getElementById('platformsReached').textContent = new Set(postHistory.flatMap(p => p.platforms)).size;
-            document.getElementById('timeSaved').textContent = `~${todayPosts.length * 3}m`;
+            document.getElementById('reactionsToday').textContent = '-';
+            document.getElementById('platformsReached').textContent = platformsReached;
+            document.getElementById('timeSaved').textContent = todayPosts.length > 0 ? `~${todayPosts.length * 2}m` : '-';
         }
 
         // Show toast notification
@@ -2391,24 +2323,14 @@
                 return;
             }
 
-            const useInternalComposer = shouldUseInternalComposer(platform);
-            console.log('[Composer] Use internal composer:', useInternalComposer);
             console.log('[Composer] pyBridge available:', !!pyBridge);
 
-            // Use docked composer for X and YouTube (centralized experience)
-            if (pyBridge && pyBridge.openDockedUrl) {
-                console.log('[Composer] Opening in docked composer');
-                if (platform === 'youtube' && pyBridge.openDockedUrlWithText) {
-                    pyBridge.openDockedUrlWithText(url, textToUse);
-                } else {
-                    pyBridge.openDockedUrl(url);
-                }
-            } else if (pyBridge && pyBridge.openDockedUrl) {
-                pyBridge.openDockedUrl(url);
+            // X and YouTube use external browser (cookies don't persist in embedded view)
+            if ((platform === 'x' || platform === 'youtube') && pyBridge && pyBridge.openExternalUrl) {
+                console.log('[Composer] Opening in external browser (X/YT use system browser)');
+                pyBridge.openExternalUrl(url);
             } else if (pyBridge && pyBridge.openInternalUrl) {
                 pyBridge.openInternalUrl(url);
-            } else if (pyBridge && pyBridge.openInternalUrlWithText) {
-                pyBridge.openInternalUrlWithText(url, textToUse);
             } else if (pyBridge && pyBridge.openExternalUrl) {
                 console.log('[Composer] Opening in external browser');
                 pyBridge.openExternalUrl(url);
@@ -2428,10 +2350,7 @@
 
             if (!url) return;
 
-            // Use docked composer for login too
-            if (pyBridge && pyBridge.openDockedUrl) {
-                pyBridge.openDockedUrl(url);
-            } else if (pyBridge && pyBridge.openInternalUrl) {
+            if (pyBridge && pyBridge.openInternalUrl) {
                 pyBridge.openInternalUrl(url);
             } else if (pyBridge && pyBridge.openExternalUrl) {
                 pyBridge.openExternalUrl(url);
@@ -2760,16 +2679,16 @@
                 if (pyBridge && pyBridge.deleteSavedCredentials) {
                     const result = await pyBridge.deleteSavedCredentials();
                     if (result) {
-                        // Clear from localStorage too
                         if (apiSettings.bluesky) {
                             delete apiSettings.bluesky.password;
+                            delete apiSettings.bluesky.handle;
+                            delete apiSettings.bluesky.avatar;
                         }
                         localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
-
-                        // Clear the password field
+                        document.getElementById('bskyHandle').value = '';
                         document.getElementById('bskyPassword').value = '';
-
                         showToast('✓ Encrypted credentials deleted', 'success');
+                        updateBlueskyLoginStatus('', '');
                     } else {
                         showToast('Failed to delete credentials', 'error');
                     }
@@ -2808,10 +2727,25 @@
             statusEl.classList.remove('hidden');
 
             try {
-                // Use the Python bridge to test Bluesky connection
-                if (pyBridge && pyBridge.testBlueskyConnection) {
-                    const result = await pyBridge.testBlueskyConnection(handle, password);
-                    if (result) {
+            // Use the Python bridge to test Bluesky connection
+            if (pyBridge && pyBridge.testBlueskyConnection) {
+                const result = await pyBridge.testBlueskyConnection(handle, password);
+                console.log('[Bluesky] test result:', result);
+                if (result && typeof result === 'object') {
+                    statusEl.innerHTML = `
+                        <div class="bg-green-900/30 border border-green-700/50 rounded-lg p-2 flex items-center gap-2">
+                            <i class="fas fa-check-circle text-green-400"></i>
+                            <span class="text-xs text-green-300">${result.message || '✓ Connection successful! Credentials saved.'}</span>
+                        </div>
+                    `;
+                    apiSettings.bluesky = { handle, password };
+                    localStorage.setItem('unifiedPublisherApiSettings', JSON.stringify(apiSettings));
+                    updateBlueskyLoginStatus(result.handle || handle, result.avatar || '');
+                    showToast(`✓ Bluesky connected as ${result.handle || handle}`, 'success');
+                    document.getElementById('platform-bluesky').checked = true;
+                    updateCharCounts();
+                } else if (result === true) {
+
                         statusEl.innerHTML = `
                             <div class="bg-green-900/30 border border-green-700/50 rounded-lg p-2 flex items-center gap-2">
                                 <i class="fas fa-check-circle text-green-400"></i>
@@ -2825,6 +2759,8 @@
                         // Update preview with handle (no avatar from app password login)
                         updateBlueskyLoginStatus(handle, '');
                         showToast(`✓ Bluesky connected as ${handle}`, 'success');
+                        document.getElementById('platform-bluesky').checked = true;
+                        updateCharCounts();
                     } else {
                         throw new Error('Authentication failed');
                     }
@@ -2852,10 +2788,10 @@
                 `;
             }
 
-            // Hide status after 5 seconds
+            // Hide status after 8 seconds to avoid flashing success/failure
             setTimeout(() => {
                 statusEl.classList.add('hidden');
-            }, 5000);
+            }, 8000);
         }
 
         // Login status update functions (called from ComposerWindow)

@@ -6,8 +6,9 @@ import json
 import os
 import sys
 
-from PyQt6.QtCore import QObject, Qt, QUrl, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QObject, Qt, QUrl, QDateTime, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QDesktopServices
+from PyQt6.QtNetwork import QNetworkCookie
 from PyQt6.QtWebChannel import QWebChannel
 from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineProfile, QWebEngineSettings
 from PyQt6.QtWebEngineWidgets import QWebEngineView
@@ -22,6 +23,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from publisherlogic.credentials import CredentialManager
 from publisherlogic.user_agent import (
     detect_os_family,
     extract_chrome_version,
@@ -34,18 +36,20 @@ class Bridge(QObject):
     # format: (platform_name, success_Bool, message_string)
     operationFinished = pyqtSignal(str, bool, str)
 
-    def __init__(self, main_window, parent=None):
+    def __init__(self, main_window, credential_manager=None, parent=None):
         super().__init__(parent)
         self.main_window = main_window
 
-        # Initialize credential manager
-        from publisherlogic.credentials import CredentialManager
-
-        self.credential_manager = CredentialManager()
+        # Use shared credential manager from main window
+        self.credential_manager = credential_manager or getattr(
+            main_window, "credential_manager", None
+        )
+        if self.credential_manager is None:
+            self.credential_manager = CredentialManager()
 
         print("[Bridge]: Your brain is connected to your ass.")
 
-    @pyqtSlot(str, str, result=str)
+    @pyqtSlot(str, str)
     def testConnection(self, msg, origin):
         """Are you a liar? This tests if shit is fucked or not."""
         print(f"[Bridge] Handshake from {origin}: {msg}")
@@ -89,7 +93,7 @@ class Bridge(QObject):
             print(f"[Bridge] Error: Oh shit baby girl: {err}!")
             self.operationFinished.emit("error", False, str(err))
 
-    @pyqtSlot(str, result=bool)
+    @pyqtSlot(str)
     def openExternalUrl(self, url):
         """Open an external URL in the user's default browser."""
         print(f"[Bridge] openExternalUrl called with: {url}")
@@ -101,7 +105,7 @@ class Bridge(QObject):
             print(f"[Bridge] Failed to open URL: {err}")
             return False
 
-    @pyqtSlot(str, result=bool)
+    @pyqtSlot(str)
     def openInternalUrl(self, url):
         """Open a URL inside the app via a docked composer panel."""
         print(f"[Bridge] openInternalUrl called with: {url}")
@@ -112,7 +116,7 @@ class Bridge(QObject):
         print(f"[Bridge] Internal URL opened: {result}")
         return result
 
-    @pyqtSlot(str, str, result=bool)
+    @pyqtSlot(str, str)
     def openInternalUrlWithText(self, url, text):
         """Open a URL inside the app and attempt to prefill text."""
         print(f"[Bridge] openInternalUrlWithText called with: {url}")
@@ -123,7 +127,7 @@ class Bridge(QObject):
         print(f"[Bridge] Internal URL opened (prefill): {result}")
         return result
 
-    @pyqtSlot(str, result=bool)
+    @pyqtSlot(str)
     def openDockedUrl(self, url):
         """Open a URL in a DOCKED composer widget within the main window."""
         print(f"[Bridge] openDockedUrl called with: {url}")
@@ -134,7 +138,7 @@ class Bridge(QObject):
         print(f"[Bridge] Docked composer opened: {result}")
         return result
 
-    @pyqtSlot(str, str, result=bool)
+    @pyqtSlot(str, str)
     def openDockedUrlWithText(self, url, text):
         """Open a URL in a docked composer and attempt to prefill text."""
         print(f"[Bridge] openDockedUrlWithText called with: {url}")
@@ -145,7 +149,7 @@ class Bridge(QObject):
         print(f"[Bridge] Docked composer opened (prefill): {result}")
         return result
 
-    @pyqtSlot(str, str, result=bool)
+    @pyqtSlot(str, str)
     def testBlueskyConnection(self, handle, password):
         """Test Bluesky credentials by attempting to authenticate."""
         print(f"[Bridge] Testing Bluesky connection for: {handle}")
@@ -164,7 +168,7 @@ class Bridge(QObject):
             print(f"[Bridge] ✗ Bluesky login failed: {err}")
             return False
 
-    @pyqtSlot(result=str)
+    @pyqtSlot()
     def loadSavedCredentials(self):
         """
         Load saved encrypted credentials
@@ -178,7 +182,7 @@ class Bridge(QObject):
             return json.dumps(credentials)
         return ""
 
-    @pyqtSlot(result=bool)
+    @pyqtSlot()
     def hasSavedCredentials(self):
         """
         Check if encrypted credentials are saved
@@ -188,7 +192,7 @@ class Bridge(QObject):
         """
         return self.credential_manager.has_saved_credentials()
 
-    @pyqtSlot(result=bool)
+    @pyqtSlot()
     def deleteSavedCredentials(self):
         """
         Delete saved encrypted credentials
@@ -199,7 +203,16 @@ class Bridge(QObject):
         print("[Bridge] Deleting saved credentials...")
         return self.credential_manager.delete_credentials()
 
-    @pyqtSlot(str, result=bool)
+    @pyqtSlot(str)
+    def resetPlatformSession(self, platform):
+        """Reset stored credentials and profile data for a platform."""
+        print(f"[Bridge] Reset platform session requested: {platform}")
+        if not self.main_window or not hasattr(self.main_window, "reset_platform_session"):
+            print("[Bridge] No main window reset handler available")
+            return False
+        return self.main_window.reset_platform_session(platform)
+
+    @pyqtSlot(str)
     def setClipboardText(self, text):
         """
         Copy text to system clipboard.
@@ -212,7 +225,7 @@ class Bridge(QObject):
         """
         try:
             clipboard = QApplication.clipboard()
-            clipboard.setText(text)
+            clipboard.setText(text)  # type: ignore[attr-defined]
             print(
                 f"[Bridge] ✓ Copied to clipboard: {text[:50]}{'...' if len(text) > 50 else ''}"
             )
@@ -221,7 +234,7 @@ class Bridge(QObject):
             print(f"[Bridge] ✗ Clipboard copy failed: {err}")
             return False
 
-    @pyqtSlot(result=bool)
+    @pyqtSlot()
     def performJsCleanup(self):
         """
         Trigger JavaScript cleanup on frontend.
@@ -234,7 +247,9 @@ class Bridge(QObject):
             if self.main_window and hasattr(self.main_window, "browser"):
                 # Call the JavaScript cleanup function
                 js_code = "if (typeof performJsCleanup === 'function') { performJsCleanup(); } else { console.log('[Bridge] JavaScript cleanup function not found'); }"
-                self.main_window.browser.page().runJavaScript(js_code)
+                self.main_window.browser.page().runJavaScript(  # type: ignore[attr-defined]
+                    js_code
+                )
                 return True
             else:
                 print("[Bridge] No browser available for JS cleanup")
@@ -255,11 +270,14 @@ class ComposerWindow(QMainWindow):
         self.resize(1000, 700)
         self.platform = platform
         self.parent_window = parent
+        self.credential_manager = getattr(parent, "credential_manager", None)
         self.login_detected = False
         self.post_success_signaled = False  # Track if we already signaled post success
         self.prefill_text = prefill_text or ""
         self.prefill_attempts = 0
         self.prefill_completed = False
+        self.cookies_restored = False
+        self.cookie_jar = {}
 
         # Detect if this is a login-only flow vs posting flow
         # Login mode: auto-close after detecting login
@@ -274,6 +292,7 @@ class ComposerWindow(QMainWindow):
         self.browser.settings().setAttribute(
             QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True
         )
+        self._setup_cookie_tracking()
 
         # Inject anti-detection JavaScript when page loads
         self.browser.loadFinished.connect(self._inject_anti_detection)
@@ -391,6 +410,7 @@ class ComposerWindow(QMainWindow):
         self.loading_overlay.show()
 
         # Load URL
+        self._restore_cookies()
         self.browser.setUrl(QUrl(url))
 
         self.setCentralWidget(container)
@@ -440,7 +460,9 @@ class ComposerWindow(QMainWindow):
             // Note: Can't enumerate all contexts, but stopping media elements should be enough
         }
         """
-        self.browser.page().runJavaScript(js_stop_media)
+        self.browser.page().runJavaScript(  # type: ignore[attr-defined]
+            js_stop_media
+        )
 
         # Clear the page to force cleanup
         self.browser.setUrl(QUrl("about:blank"))
@@ -474,24 +496,19 @@ class ComposerWindow(QMainWindow):
         os_family = detect_os_family(chrome_user_agent)
         print(f"[Composer] Using UA: {os_family} Chrome/{chrome_version or 'unknown'}")
 
-        # Clear corrupted/tracking databases that cause errors or embed detection
-        # This helps X/YouTube treat us more like a regular browser
+        # Clear cache directories that cause errors or embed detection
+        # Preserve session storage so logins can persist between runs.
         if self.platform in ("x", "youtube"):
-            print(f"[Composer] Clearing problematic storage for {self.platform}...")
+            print(f"[Composer] Clearing cache storage for {self.platform}...")
 
-            # Storage that causes embed detection or errors
-            problematic_paths = [
-                "Service Worker",
-                "IndexedDB",
+            cache_paths = [
                 "GPUCache",
                 "DawnWebGPUCache",
                 "DawnGraphiteCache",
                 "Cache",
-                "Local Storage",
-                "Session Storage",
             ]
 
-            for item in problematic_paths:
+            for item in cache_paths:
                 path = os.path.join(profile_path, item)
                 if os.path.exists(path):
                     try:
@@ -510,12 +527,204 @@ class ComposerWindow(QMainWindow):
         # Configure profile for better compatibility
         settings = profile.settings()
         settings.setAttribute(settings.WebAttribute.LocalStorageEnabled, True)
-        settings.setAttribute(settings.WebAttribute.CookiesEnabled, True)
+        if hasattr(settings.WebAttribute, "CookiesEnabled"):
+            settings.setAttribute(settings.WebAttribute.CookiesEnabled, True)
         settings.setAttribute(settings.WebAttribute.JavascriptEnabled, True)
         settings.setAttribute(settings.WebAttribute.JavascriptCanAccessClipboard, True)
 
         print(f"[Composer] Created profile for {self.platform}: {profile_path}")
         return profile
+
+    def _default_cookie_domain(self):
+        return {
+            "x": "x.com",
+            "youtube": "youtube.com",
+            "bluesky": "bsky.app",
+        }.get(self.platform or "", "")
+
+    def _cookie_origin_url(self, cookie_data):
+        domain = (cookie_data.get("domain") or "").lstrip(".")
+        if not domain:
+            domain = self._default_cookie_domain()
+        if not domain:
+            return QUrl()
+        scheme = "https" if cookie_data.get("secure", True) else "http"
+        return QUrl(f"{scheme}://{domain}")
+
+    def _cookie_from_dict(self, cookie_data):
+        try:
+            name = cookie_data.get("name")
+            value = cookie_data.get("value")
+            if not name:
+                return None
+            cookie = QNetworkCookie()
+            cookie.setName(name.encode("utf-8"))
+            cookie.setValue((value or "").encode("utf-8"))
+            domain = cookie_data.get("domain") or ""
+            if domain:
+                cookie.setDomain(domain)
+            path = cookie_data.get("path") or "/"
+            cookie.setPath(path)
+            cookie.setSecure(bool(cookie_data.get("secure", False)))
+            cookie.setHttpOnly(bool(cookie_data.get("http_only", False)))
+            expires = cookie_data.get("expires")
+            if expires:
+                expiration = QDateTime.fromString(expires, Qt.DateFormat.ISODate)
+                if expiration.isValid():
+                    cookie.setExpirationDate(expiration)
+            return cookie
+        except Exception as e:
+            print(f"[Composer] ⚠ Failed to restore cookie: {e}")
+            return None
+
+    def _cookie_to_dict(self, cookie):
+        try:
+            expires = cookie.expirationDate()
+            expires_str = (
+                expires.toString(Qt.DateFormat.ISODate) if expires.isValid() else ""
+            )
+            return {
+                "name": bytes(cookie.name()).decode("utf-8", "ignore"),
+                "value": bytes(cookie.value()).decode("utf-8", "ignore"),
+                "domain": cookie.domain(),
+                "path": cookie.path(),
+                "secure": cookie.isSecure(),
+                "http_only": cookie.isHttpOnly(),
+                "expires": expires_str,
+            }
+        except Exception as e:
+            print(f"[Composer] ⚠ Failed to serialize cookie: {e}")
+            return None
+
+    def _setup_cookie_tracking(self):
+        try:
+            cookie_store = self.profile.cookieStore()
+        except Exception as e:
+            print(f"[Composer] ⚠ Cookie store unavailable: {e}")
+            return
+        if hasattr(cookie_store, "cookieAdded"):
+            cookie_store.cookieAdded.connect(self._on_cookie_added)
+        if hasattr(cookie_store, "cookieRemoved"):
+            cookie_store.cookieRemoved.connect(self._on_cookie_removed)
+        if hasattr(cookie_store, "loadAllCookies"):
+            cookie_store.loadAllCookies()
+
+    def _cookie_key(self, cookie_data):
+        if not cookie_data:
+            return None
+        name = cookie_data.get("name") or ""
+        domain = cookie_data.get("domain") or ""
+        path = cookie_data.get("path") or ""
+        return f"{domain}|{path}|{name}"
+
+    def _store_cookie_data(self, cookie_data):
+        key = self._cookie_key(cookie_data)
+        if not key:
+            return
+        self.cookie_jar[key] = cookie_data
+
+    def _on_cookie_added(self, cookie):
+        cookie_data = self._cookie_to_dict(cookie)
+        if cookie_data:
+            self._store_cookie_data(cookie_data)
+
+    def _on_cookie_removed(self, cookie):
+        cookie_data = self._cookie_to_dict(cookie)
+        key = self._cookie_key(cookie_data)
+        if key and key in self.cookie_jar:
+            self.cookie_jar.pop(key, None)
+
+    def _normalize_cookie_payload(self, cookies_data):
+        normalized = []
+
+        def handle_item(item):
+            if not item:
+                return
+            if isinstance(item, dict):
+                normalized.append(item)
+                return
+            if isinstance(item, list):
+                for sub in item:
+                    handle_item(sub)
+                return
+            if isinstance(item, str):
+                try:
+                    parsed = json.loads(item)
+                except Exception:
+                    parsed = None
+                if isinstance(parsed, (dict, list)):
+                    handle_item(parsed)
+                    return
+                try:
+                    parsed_cookies = QNetworkCookie.parseCookies(
+                        item.encode("utf-8")
+                    )
+                except Exception:
+                    parsed_cookies = []
+                for cookie in parsed_cookies:
+                    cookie_data = self._cookie_to_dict(cookie)
+                    if cookie_data:
+                        normalized.append(cookie_data)
+                return
+
+        handle_item(cookies_data)
+        return normalized
+
+    def _collect_cookies(self):
+        cookies = None
+        try:
+            cookie_store = self.profile.cookieStore()
+            if hasattr(cookie_store, "cookies"):
+                cookies = cookie_store.cookies()  # type: ignore[attr-defined]
+        except Exception as e:
+            print(f"[Composer] ⚠ Failed to read cookies: {e}")
+        serialized = []
+        if cookies:
+            for cookie in cookies:
+                item = self._cookie_to_dict(cookie)
+                if item:
+                    serialized.append(item)
+            return serialized
+        if self.cookie_jar:
+            return list(self.cookie_jar.values())
+        return serialized
+
+    def _restore_cookies(self):
+        if self.cookies_restored:
+            return
+        self.cookies_restored = True
+        if not self.platform or not self.credential_manager:
+            return
+        creds = self.credential_manager.load_platform_credentials(self.platform)
+        cookies_data = (creds or {}).get("cookies") or []
+        cookies_payload = self._normalize_cookie_payload(cookies_data)
+        if not cookies_payload:
+            return
+        try:
+            cookie_store = self.profile.cookieStore()
+        except Exception as e:
+            print(f"[Composer] ⚠ Cookie store unavailable: {e}")
+            return
+        restored = 0
+        for cookie_data in cookies_payload:
+            cookie = self._cookie_from_dict(cookie_data)
+            if not cookie:
+                continue
+            origin = self._cookie_origin_url(cookie_data)
+            cookie_store.setCookie(cookie, origin)  # type: ignore[attr-defined]
+            restored += 1
+            self._store_cookie_data(cookie_data)
+        print(f"[Composer] Restored {restored} cookies for {self.platform}")
+
+    def _persist_platform_session(self, profile_payload):
+        if not self.platform or not self.credential_manager:
+            return False
+        payload = dict(profile_payload or {})
+        payload["cookies"] = self._collect_cookies()
+        payload["saved_at"] = QDateTime.currentDateTimeUtc().toString(
+            Qt.DateFormat.ISODate
+        )
+        return self.credential_manager.save_platform_credentials(self.platform, payload)
 
     def _inject_anti_detection(self):
         """Inject JavaScript to mask Qt WebEngine fingerprints"""
@@ -557,7 +766,9 @@ class ComposerWindow(QMainWindow):
             console.log('[Anti-detect] Applied navigator overrides');
         })();
         """
-        self.browser.page().runJavaScript(anti_detection_js)
+        self.browser.page().runJavaScript(  # type: ignore[attr-defined]
+            anti_detection_js
+        )
 
     def _detect_login_mode(self, url):
         """
@@ -613,10 +824,24 @@ class ComposerWindow(QMainWindow):
         print(f"[Composer] Defaulting to POSTING mode (keep window open)")
         return False
 
+    def _check_auth_callback(self, url_str):
+        url = QUrl(url_str)
+        if url.scheme() != "unifiedpublisher" or url.host() != "auth":
+            return False
+        platform = url.path().lstrip("/").split("/")[0]
+        if self.platform and platform and platform != self.platform:
+            return False
+        print(f"[Composer] Auth callback detected for {platform or self.platform}")
+        self._handle_login_success()
+        return True
+
     def check_login_status(self, url):
         """Check for login success or post success based on URL changes"""
         url_str = url.toString()
         print(f"[Composer] URL changed to: {url_str}")
+
+        if self._check_auth_callback(url_str):
+            return
 
         # First check for POST SUCCESS (only in posting mode)
         if not self.is_login_mode:
@@ -687,34 +912,39 @@ class ComposerWindow(QMainWindow):
 
                 QTimer.singleShot(2000, self.extract_bluesky_user_info)
 
-        if logged_in and not self.login_detected:
-            self.login_detected = True
-            self.status_label.setText("✓ Logged in successfully!")
-            self.status_label.setStyleSheet("""
-                color: #06d6a0;
-                font-size: 11px;
-                font-weight: 600;
-                padding: 4px 10px;
-                background: rgba(6, 214, 160, 0.15);
-                border-radius: 12px;
-                border: 1px solid rgba(6, 214, 160, 0.4);
-            """)
-            print(f"[Composer] Login confirmed for {self.platform}")
+        if logged_in:
+            self._handle_login_success()
 
-            # Only auto-close in login mode (not when user is trying to post)
-            if self.is_login_mode:
-                print(f"[Composer] Login mode - auto-closing in 3 seconds...")
+    def _handle_login_success(self):
+        if self.login_detected:
+            return
+        self.login_detected = True
+        self.status_label.setText("✓ Logged in successfully!")
+        self.status_label.setStyleSheet("""
+            color: #06d6a0;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            background: rgba(6, 214, 160, 0.15);
+            border-radius: 12px;
+            border: 1px solid rgba(6, 214, 160, 0.4);
+        """)
+        print(f"[Composer] Login confirmed for {self.platform}")
+
+        # Only auto-close in login mode (not when user is trying to post)
+        if self.is_login_mode:
+            print(f"[Composer] Login mode - auto-closing in 3 seconds...")
+            from PyQt6.QtCore import QTimer
+
+            QTimer.singleShot(3000, self.close)
+        else:
+            print(
+                f"[Composer] Posting mode - keeping window open for user to complete post"
+            )
+            if self.platform == "youtube":
                 from PyQt6.QtCore import QTimer
 
-                QTimer.singleShot(3000, self.close)
-            else:
-                print(
-                    f"[Composer] Posting mode - keeping window open for user to complete post"
-                )
-                if self.platform == "youtube":
-                    from PyQt6.QtCore import QTimer
-
-                    QTimer.singleShot(1500, self._maybe_prefill)
+                QTimer.singleShot(1500, self._maybe_prefill)
 
     def _check_post_success(self, url_str):
         """
@@ -849,7 +1079,9 @@ class ComposerWindow(QMainWindow):
             return JSON.stringify({username: username, avatar: avatarUrl});
         })();
         """
-        self.browser.page().runJavaScript(js_code, self.handle_x_user_info)
+        self.browser.page().runJavaScript(  # type: ignore[attr-defined]
+            js_code, self.handle_x_user_info
+        )
 
     def _maybe_prefill(self):
         if not self.prefill_text:
@@ -918,7 +1150,9 @@ class ComposerWindow(QMainWindow):
             return JSON.stringify({{ok: true}});
         }})();
         """
-        self.browser.page().runJavaScript(js_code, self._handle_youtube_prefill_result)
+        self.browser.page().runJavaScript(  # type: ignore[attr-defined]
+            js_code, self._handle_youtube_prefill_result
+        )
 
     def _handle_youtube_prefill_result(self, result_json):
         try:
@@ -950,12 +1184,16 @@ class ComposerWindow(QMainWindow):
             username = data.get("username", "")
             avatar = data.get("avatar", "")
 
-            if username and self.parent_window:
+            if username:
                 print(
                     f"[Composer] ✓ Extracted X username: @{username}, Avatar: {avatar[:50] if avatar else 'none'}"
                 )
-                # Update parent window's bridge to save settings
-                if hasattr(self.parent_window, "browser"):
+                saved = self._persist_platform_session(
+                    {"handle": username, "avatar": avatar}
+                )
+                if saved:
+                    print("[Composer] ✓ X session cookies saved")
+                if self.parent_window and hasattr(self.parent_window, "browser"):
                     # Properly escape avatar URL for JavaScript
                     avatar_escaped = (
                         avatar.replace("'", "\\'").replace('"', '\\"') if avatar else ""
@@ -969,9 +1207,11 @@ class ComposerWindow(QMainWindow):
                         console.error('[Composer] updateXLoginStatus function not found!');
                     }}
                     """
-                    self.parent_window.browser.page().runJavaScript(js_update)
+                    self.parent_window.browser.page().runJavaScript(  # type: ignore[attr-defined]
+                        js_update
+                    )
             else:
-                print(f"[Composer] ⚠ Failed to extract X username or no parent window")
+                print(f"[Composer] ⚠ Failed to extract X username")
         except Exception as e:
             print(f"[Composer] ⚠ Error parsing X data: {e}")
 
@@ -1026,7 +1266,9 @@ class ComposerWindow(QMainWindow):
             return JSON.stringify({handle: channelHandle, avatar: avatarUrl});
         })();
         """
-        self.browser.page().runJavaScript(js_code, self.handle_youtube_user_info)
+        self.browser.page().runJavaScript(  # type: ignore[attr-defined]
+            js_code, self.handle_youtube_user_info
+        )
 
     def handle_youtube_user_info(self, data_json):
         """Handle extracted YouTube channel handle and avatar"""
@@ -1038,12 +1280,16 @@ class ComposerWindow(QMainWindow):
             handle = data.get("handle", "")
             avatar = data.get("avatar", "")
 
-            if handle and self.parent_window:
+            if handle:
                 print(
                     f"[Composer] ✓ Extracted YouTube handle: @{handle}, Avatar: {avatar[:50] if avatar else 'none'}"
                 )
-                # Update parent window to save settings
-                if hasattr(self.parent_window, "browser"):
+                saved = self._persist_platform_session(
+                    {"channel_id": handle, "avatar": avatar}
+                )
+                if saved:
+                    print("[Composer] ✓ YouTube session cookies saved")
+                if self.parent_window and hasattr(self.parent_window, "browser"):
                     # Properly escape avatar URL for JavaScript
                     avatar_escaped = (
                         avatar.replace("'", "\\'").replace('"', '\\"') if avatar else ""
@@ -1056,11 +1302,11 @@ class ComposerWindow(QMainWindow):
                         console.error('[Composer] updateYouTubeLoginStatus function not found!');
                     }}
                     """
-                    self.parent_window.browser.page().runJavaScript(js_update)
+                    self.parent_window.browser.page().runJavaScript(  # type: ignore[attr-defined]
+                        js_update
+                    )
             else:
-                print(
-                    f"[Composer] ⚠ Failed to extract YouTube handle or no parent window"
-                )
+                print(f"[Composer] ⚠ Failed to extract YouTube handle")
         except Exception as e:
             print(f"[Composer] ⚠ Error parsing YouTube data: {e}")
 
@@ -1115,7 +1361,9 @@ class ComposerWindow(QMainWindow):
             return JSON.stringify({handle: handle, avatar: avatarUrl});
         })();
         """
-        self.browser.page().runJavaScript(js_code, self.handle_bluesky_user_info)
+        self.browser.page().runJavaScript(  # type: ignore[attr-defined]
+            js_code, self.handle_bluesky_user_info
+        )
 
     def handle_bluesky_user_info(self, data_json):
         """Handle extracted Bluesky handle and avatar"""
@@ -1145,7 +1393,9 @@ class ComposerWindow(QMainWindow):
                         console.error('[Composer] updateBlueskyLoginStatus function not found!');
                     }}
                     """
-                    self.parent_window.browser.page().runJavaScript(js_update)
+                    self.parent_window.browser.page().runJavaScript(  # type: ignore[attr-defined]
+                        js_update
+                    )
             else:
                 print(
                     f"[Composer] ⚠ Failed to extract Bluesky handle or no parent window"
@@ -1163,6 +1413,8 @@ class UnifiedWindow(QMainWindow):
 
         # Track open composer windows
         self.composer_windows = []
+        self.platform_windows = {}
+        self.credential_manager = CredentialManager()
 
         # Embed Browser with isolated profile
         self.browser = QWebEngineView()
@@ -1192,7 +1444,7 @@ class UnifiedWindow(QMainWindow):
 
         # BUILD THAT BRIDGE, BRIDGETTE!
         self.channel = QWebChannel()
-        self.bridge = Bridge(self)
+        self.bridge = Bridge(self, credential_manager=self.credential_manager)
 
         # Register bridge so JS can touch it as pyBridge
         self.channel.registerObject("pyBridge", self.bridge)
@@ -1224,6 +1476,23 @@ class UnifiedWindow(QMainWindow):
                 title = "Bluesky Settings"
                 platform = "bluesky"
 
+            if platform:
+                existing = self.platform_windows.get(platform)
+                if existing and existing.isVisible():
+                    print(f"[Bridge] Reusing {platform} composer window")
+                    existing.raise_()
+                    existing.activateWindow()
+                    existing.is_login_mode = existing._detect_login_mode(url)
+                    existing.prefill_text = prefill_text or ""
+                    existing.prefill_attempts = 0
+                    existing.prefill_completed = False
+                    existing.browser.setUrl(QUrl(url))
+                    if prefill_text:
+                        existing._maybe_prefill()
+                    return True
+                if existing:
+                    self.platform_windows.pop(platform, None)
+
             # Create and show popup window
             composer = ComposerWindow(
                 url,
@@ -1236,6 +1505,8 @@ class UnifiedWindow(QMainWindow):
 
             # Track window to prevent garbage collection
             self.composer_windows.append(composer)
+            if platform:
+                self.platform_windows[platform] = composer
 
             # Clean up closed windows
             self.composer_windows = [w for w in self.composer_windows if w.isVisible()]
@@ -1319,6 +1590,40 @@ class UnifiedWindow(QMainWindow):
             print(f"[Bridge] Failed to open docked composer: {err}")
             return False
 
+    def reset_platform_session(self, platform):
+        """Clear stored credentials and profile storage for a platform."""
+        if not platform:
+            return False
+        print(f"[Bridge] Resetting platform session for {platform}")
+
+        if self.credential_manager:
+            self.credential_manager.delete_platform_credentials(platform)
+
+        if platform in self.platform_windows:
+            try:
+                self.platform_windows[platform].close()
+            except Exception as err:
+                print(f"[Bridge] Failed to close {platform} window: {err}")
+            self.platform_windows.pop(platform, None)
+
+        base_profile_path = os.path.join(os.path.expanduser("~"), ".unifiedpublisher")
+        profile_dirs = [
+            f"webprofile_{platform}",
+            f"webprofile_docked_{platform}",
+        ]
+        import shutil
+
+        for dir_name in profile_dirs:
+            dir_path = os.path.join(base_profile_path, dir_name)
+            if os.path.exists(dir_path):
+                try:
+                    shutil.rmtree(dir_path)
+                    print(f"[Bridge] ✓ Removed {dir_name}")
+                except Exception as err:
+                    print(f"[Bridge] ⚠ Could not remove {dir_name}: {err}")
+
+        return True
+
     def _build_docked_profile(self, platform):
         """Build a web profile for docked composers."""
         from publisherlogic.user_agent import pick_user_agent
@@ -1360,7 +1665,9 @@ class UnifiedWindow(QMainWindow):
             console.log('[Docked-Antidetect] Applied navigator overrides');
         })();
         """
-        web_view.page().runJavaScript(anti_detection_js)
+        web_view.page().runJavaScript(  # type: ignore[attr-defined]
+            anti_detection_js
+        )
 
     def on_composer_post_success(self, platform):
         """Called when a composer detects successful post - signals JS queue to advance."""
@@ -1377,7 +1684,9 @@ class UnifiedWindow(QMainWindow):
             }}
         }}
         """
-        self.browser.page().runJavaScript(js_code)
+        self.browser.page().runJavaScript(  # type: ignore[attr-defined]
+            js_code
+        )
 
     def cleanup_application(self):
         """Perform proper cleanup of WebEngine resources and profiles."""
@@ -1395,6 +1704,7 @@ class UnifiedWindow(QMainWindow):
                     except Exception as e:
                         print(f"[Cleanup] Error closing composer window: {e}")
                 self.composer_windows.clear()
+                self.platform_windows.clear()
 
             # Close any docked composers
             if hasattr(self, "dock_composers"):
@@ -1425,7 +1735,9 @@ class UnifiedWindow(QMainWindow):
                         window.stop();
                     }
                     """
-                    self.browser.page().runJavaScript(stop_media_js)
+                    self.browser.page().runJavaScript(  # type: ignore[attr-defined]
+                        stop_media_js
+                    )
 
                     # Clear the page to force cleanup
                     self.browser.setUrl(QUrl("about:blank"))
@@ -1486,7 +1798,7 @@ class UnifiedWindow(QMainWindow):
             if not os.path.exists(base_profile_path):
                 return
 
-            # Platforms that need aggressive cleanup
+            # Platforms that need cache cleanup
             problematic_platforms = ["x", "youtube", "bluesky"]
 
             for platform in problematic_platforms:
@@ -1495,21 +1807,15 @@ class UnifiedWindow(QMainWindow):
                 if os.path.exists(profile_path):
                     print(f"[Cleanup] Cleaning profile for {platform}...")
 
-                    # Remove problematic cache/storage that causes issues
-                    problematic_dirs = [
-                        "Service Worker",
-                        "IndexedDB",
+                    # Remove cache directories only; preserve session/cookie storage.
+                    cache_dirs = [
                         "GPUCache",
                         "DawnWebGPUCache",
                         "DawnGraphiteCache",
                         "Cache",
-                        "Local Storage",
-                        "Session Storage",
-                        "QuotaManager",
-                        "GracePeriodCookieStore",
                     ]
 
-                    for dir_name in problematic_dirs:
+                    for dir_name in cache_dirs:
                         dir_path = os.path.join(profile_path, dir_name)
                         if os.path.exists(dir_path):
                             try:
@@ -1523,7 +1829,7 @@ class UnifiedWindow(QMainWindow):
                         base_profile_path, f"webprofile_docked_{platform}"
                     )
                     if os.path.exists(docked_profile_path):
-                        for dir_name in problematic_dirs:
+                        for dir_name in cache_dirs:
                             dir_path = os.path.join(docked_profile_path, dir_name)
                             if os.path.exists(dir_path):
                                 try:
